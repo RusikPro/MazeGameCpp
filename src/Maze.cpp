@@ -1,4 +1,5 @@
 #include "Maze.h"
+#include "FlexibleIterator.h"
 #include "Constants.h"
 
 #include <cstdlib>
@@ -11,22 +12,30 @@
 
 Maze::Maze ( int _size )
     :   m_size( _size )
-    ,   m_grid( _size, std::vector< Room >( _size ) )
+    ,   m_grid( _size, Rooms( _size ) )
+    ,   m_leftToRight( true )
 {
-    if ( _size > MAX_MAZE_SIZE )
-    {
-        std::ostringstream oss;
-        oss << "Maze size cannot exceed " << MAX_MAZE_SIZE
-            << ". Provided size: " << _size;
-        throw std::invalid_argument( oss.str() );
-    }
+    validateSize();
 
     generateMaze();
 }
 
 /*----------------------------------------------------------------------------*/
 
-std::vector< std::vector< Room > > const & Maze::getGrid () const
+void Maze::validateSize () const
+{
+    if ( m_size > MAX_MAZE_SIZE )
+    {
+        std::ostringstream oss;
+        oss << "Maze size cannot exceed " << MAX_MAZE_SIZE
+            << ". Provided size: " << m_size;
+        throw std::invalid_argument( oss.str() );
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+
+Maze::Grid const & Maze::getGrid () const
 {
     return m_grid;
 }
@@ -52,172 +61,156 @@ void Maze::generateMaze ()
     srand( static_cast< unsigned >( time( nullptr ) ) );
 
     // Step 1: Initialize row sets
-    std::vector< std::vector< Room > > grid( m_size, std::vector< Room >( m_size ) );
-    std::vector< int > rowSets( m_size );
+    RowSets rowSets( m_size );
     int nextSetId = 0;
 
-    for ( int col = 0; col < m_size; ++col )
-    {
-        rowSets[ col ] = nextSetId++;
-    }
+    initializeRowSets( rowSets, nextSetId );
 
     // Step 2: Process each row
-    for ( int row = 0; row < m_size; ++row )
+    for ( int row = 0; row < m_size - 1; ++row, m_leftToRight = !m_leftToRight )
     {
         // Step 2.1: Merge horizontally
-        for ( int col = 0; col < m_size - 1; ++col )
-        {
-            if (    rand() % 100 < HORIZONTAL_MERGE_PROBABILITY
-                &&  rowSets[ col ] != rowSets[ col + 1 ]
-            )
-            {
-                // Remove the right wall
-                grid[ row ][ col ].walls[ RIGHT_WALL ] = false;
-                grid[ row ][ col + 1 ].walls[ LEFT_WALL ] = false;
-
-                // Merge the sets
-                int oldSet = rowSets[ col + 1 ];
-                int newSet = rowSets[ col ];
-                for ( int i = 0; i < m_size; ++i )
-                {
-                    if ( rowSets[ i ] == oldSet )
-                    {
-                        rowSets[ i ] = newSet;
-                    }
-                }
-            }
-        }
+        mergeHorizontalWalls( row, rowSets );
 
         // Step 2.2: Create vertical connections
-        if ( row < m_size - 1 )
-        {
-            std::unordered_map< int, bool > setHasVerticalConnection;
-
-            // Determine the number of columns to treat as "priority columns" for vertical connections
-            int priorityColumns = static_cast< int >(
-                m_size * VERTICAL_CONNECTION_PRIORITY_PERCENTAGE
-            );
-
-
-            for ( int col = 0; col < m_size; ++col )
-            {
-                // Check if this column is within the "priority" subset
-                bool isPriorityColumn = col < priorityColumns;
-
-                bool retainBottomWall =
-                    ( isPriorityColumn && rand() % 100 < LEFTMOST_BOTTOM_WALL_PROBABILITY )
-                ;
-
-                if (    !retainBottomWall
-                    &&  (   rand() % 100 < VERTICAL_CONNECTION_PROBABILITY
-                        ||  !setHasVerticalConnection[ rowSets[ col ] ]
-                        )
-                )
-                {
-                    // Remove the bottom wall
-                    grid[ row ][ col ].walls[ BOTTOM_WALL ] = false;
-                    grid[ row + 1 ][ col ].walls[ TOP_WALL ] = false;
-
-                    setHasVerticalConnection[ rowSets[ col ] ] = true;
-                }
-            }
-
-            // Force a vertical connection for the leftmost column (col = 0)
-            if (!grid[ row ][ 0 ].walls[ BOTTOM_WALL ])
-            {
-                grid[ row ][ 0 ].walls[ BOTTOM_WALL ] = false;
-                grid[ row + 1 ][ 0 ].walls[ TOP_WALL ] = false;
-                setHasVerticalConnection[ rowSets[ 0 ] ] = true;
-            }
-
-            // Ensure vertical connections for the rightmost column as well
-            if ( !setHasVerticalConnection[ rowSets[ m_size - 1 ] ] )
-            {
-                grid[ row ][ m_size - 1 ].walls[ BOTTOM_WALL ] = false;
-                grid[ row + 1 ][ m_size - 1 ].walls[ TOP_WALL ] = false;
-                setHasVerticalConnection[ rowSets[ m_size - 1 ] ] = true;
-            }
-
-            // Step 2.3: Ensure every set has at least one vertical connection
-            // Randomly decide whether to iterate left-to-right or right-to-left
-            bool iterateLeftToRight = ( rand() % 2 == 0 ); // 50% chance for each direction
-            if ( iterateLeftToRight )
-            {
-                for ( int col = 0; col < m_size; ++col )
-                {
-                    if ( !setHasVerticalConnection[ rowSets[ col ] ] )
-                    {
-                        grid[ row ][ col ].walls[ BOTTOM_WALL ] = false;
-                        grid[ row + 1 ][ col ].walls[ TOP_WALL ] = false;
-                        setHasVerticalConnection[ rowSets[ col ] ] = true;
-                    }
-                }
-            }
-            else
-            {
-                for ( int col = m_size - 1; col >= 0; --col )
-                {
-                    if ( !setHasVerticalConnection[ rowSets[ col ] ] )
-                    {
-                        grid[ row ][ col ].walls[ BOTTOM_WALL ] = false;
-                        grid[ row + 1 ][ col ].walls[ TOP_WALL ] = false;
-                        setHasVerticalConnection[ rowSets[ col ]] = true;
-                    }
-                }
-            }
-        }
+        createVerticalConnections( row, rowSets );
 
         // Step 2.4: Prepare the next row
-        if ( row < m_size - 1 )
-        {
-            std::vector< int > newRowSets( m_size, -1 );
-            for ( int col = 0; col < m_size; ++col )
-            {
-                if ( grid[ row ][ col ].walls[ BOTTOM_WALL ] )
-                {
-                    newRowSets[ col ] = nextSetId++;
-                }
-                else
-                {
-                    newRowSets[ col ] = rowSets[ col ];
-                }
-            }
-            rowSets = newRowSets;
-        }
+        prepareTheNextRow( row, rowSets, nextSetId );
     }
 
     // Step 3: Handle the last row
-    for ( int col = 0; col < m_size - 1; ++col )
-    {
-        if ( rowSets[ col ] != rowSets[ col + 1 ] )
-        {
-            // Remove the right wall
-            grid[ m_size - 1 ][ col ].walls[ RIGHT_WALL ] = false;
-            grid[ m_size - 1 ][ col + 1 ].walls[ LEFT_WALL ] = false;
-
-            // Merge the sets
-            int oldSet = rowSets[ col + 1 ];
-            int newSet = rowSets[ col ];
-            for ( int i = 0; i < m_size; ++i )
-            {
-                if ( rowSets[ i ] == oldSet )
-                {
-                    rowSets[ i ] = newSet;
-                }
-            }
-        }
-    }
-
-    // Save the grid to the maze's internal structure
-    this->m_grid = grid;
+    handleTheLastRow( rowSets );
 
     // Randomize the maze orientation at the end
-    RotationDirection randomDirection = (rand() % 2 == 0)
+    RotationDirection randomDirection = ( rand() % 2 == 0 )
             ?   RotationDirection::Clockwise
             :   RotationDirection::Counterclockwise;
 
     int randomRotations = rand() % 4; // Rotate between 0 and 3 times
-    rotateGrid( randomDirection, randomRotations );
+    // rotateGrid( randomDirection, randomRotations );
+}
+
+/*----------------------------------------------------------------------------*/
+
+void Maze::initializeRowSets ( RowSets & _rowSets, int & _nextSetId ) const
+{
+    for ( int col = 0; col < m_size; ++col )
+    {
+        _rowSets[ col ] = _nextSetId++;
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void Maze::mergeHorizontalWalls ( int _row, RowSets & _rowSets )
+{
+    for ( FlexibleIterator it( m_size - 1, m_leftToRight ); it.hasNext(); )
+    {
+        int col = it.next();
+        if (    rand() % 100 < HORIZONTAL_MERGE_PROBABILITY
+            &&  _rowSets[ col ] != _rowSets[ col + 1 ]
+        )
+        {
+            // Remove the right wall
+            m_grid[ _row ][ col ].walls[ RIGHT_WALL ] = false;
+            m_grid[ _row ][ col + 1 ].walls[ LEFT_WALL ] = false;
+
+            // Merge the sets
+            int oldSet = _rowSets[ col + 1 ];
+            int newSet = _rowSets[ col ];
+            for ( int i = 0; i < m_size; ++i )
+            {
+                if ( _rowSets[ i ] == oldSet )
+                {
+                    _rowSets[ i ] = newSet;
+                }
+            }
+        }
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void Maze::createVerticalConnections ( int _row, RowSets & _rowSets )
+{
+    std::unordered_map< int, bool > setHasVerticalConnection;
+
+    for ( FlexibleIterator it( m_size, m_leftToRight ); it.hasNext(); )
+    {
+        int col = it.next();
+
+        if (    rand() % 100 < VERTICAL_CONNECTION_PROBABILITY
+            ||  !setHasVerticalConnection[ _rowSets[ col ] ]
+        )
+        {
+            // Remove the bottom wall
+            m_grid[ _row ][ col ].walls[ BOTTOM_WALL ] = false;
+            m_grid[ _row + 1 ][ col ].walls[ TOP_WALL ] = false;
+
+            setHasVerticalConnection[ _rowSets[ col ] ] = true;
+        }
+    }
+
+    // Ensure every set has at least one vertical connection
+    for ( FlexibleIterator it( m_size, m_leftToRight ); it.hasNext(); )
+    {
+        int col = it.next();
+        if ( !setHasVerticalConnection[ _rowSets[ col ] ] )
+        {
+            m_grid[ _row ][ col ].walls[ BOTTOM_WALL ] = false;
+            m_grid[ _row + 1 ][ col ].walls[ TOP_WALL ] = false;
+            setHasVerticalConnection[ _rowSets[ col ] ] = true;
+        }
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void Maze::prepareTheNextRow ( int _row, RowSets & _rowSets, int & _nextSetId )
+{
+    RowSets newRowSets( m_size, -1 );
+
+    for ( FlexibleIterator it( m_size, m_leftToRight ); it.hasNext(); )
+    {
+        int col = it.next();
+        if ( m_grid[ _row ][ col ].walls[ BOTTOM_WALL ] )
+        {
+            newRowSets[ col ] = _nextSetId++;
+        }
+        else
+        {
+            newRowSets[ col ] = _rowSets[ col ];
+        }
+    }
+    _rowSets = newRowSets;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void Maze::handleTheLastRow ( RowSets & _rowSets )
+{
+    for ( FlexibleIterator it( m_size - 1, m_leftToRight ); it.hasNext(); )
+    {
+        int col = it.next();
+
+        if ( _rowSets[ col ] != _rowSets[ col + 1 ] )
+        {
+            m_grid[ m_size - 1 ][ col ].walls[ RIGHT_WALL ] = false;
+            m_grid[ m_size - 1 ][ col + 1 ].walls[ LEFT_WALL ] = false;
+
+            // Merge the sets
+            int oldSet = _rowSets[ col + 1 ];
+            int newSet = _rowSets[ col ];
+            for ( int i = 0; i < m_size; ++i )
+            {
+                if ( _rowSets[ i ] == oldSet )
+                {
+                    _rowSets[ i ] = newSet;
+                }
+            }
+        }
+    }
 }
 
 /*----------------------------------------------------------------------------*/
@@ -229,9 +222,8 @@ void Maze::rotateGrid ( RotationDirection direction, int _times )
 
     for ( int t = 0; t < _times; ++t )
     {
-        std::vector< std::vector< Room > > rotatedGrid(
-            m_size, std::vector< Room >( m_size )
-        );
+        Grid rotatedGrid( m_size, Rooms( m_size ) );
+
         std::vector< std::thread > threads;
 
         const int numThreads = 4;

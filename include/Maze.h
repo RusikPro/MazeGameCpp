@@ -17,9 +17,14 @@ enum class RotationDirection
 class Maze
 {
 public:
+
+    using Rooms = std::vector< Room >;
+    using Grid = std::vector< Rooms >;
+    using RowSets = std::vector< int >;
+
     Maze ( int _size );
 
-    std::vector< std::vector< Room > > const & getGrid () const;
+    Grid const & getGrid () const;
     int getSize () const;
     const Room& getRoom ( int x, int y ) const;
 
@@ -32,8 +37,20 @@ public:
 
 private:
 
+    void validateSize () const;
+
+    void initializeRowSets ( RowSets & _rowSets, int & _nextSetId ) const;
+    void mergeHorizontalWalls ( int _row, RowSets & _rowSets );
+    void createVerticalConnections ( int _row, RowSets & _rowSets );
+    void prepareTheNextRow ( int _row, RowSets & _rowSets, int & _nextSetId );
+    void handleTheLastRow ( RowSets & _rowSets );
+
+private:
+
     int m_size;
-    std::vector< std::vector< Room > > m_grid;
+    Grid m_grid;
+
+    bool m_leftToRight;
 };
 
 #endif // MAZE_H

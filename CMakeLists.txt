@@ -17,12 +17,14 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 set(SRC_FILES
     src/Maze.cpp
     src/GameWidget.cpp
+    src/FlexibleIterator.cpp
     src/main.cpp
 )
 
 set(HEADER_FILES
     include/Maze.h
     include/GameWidget.h
+    include/FlexibleIterator.h
 )
 
 set(UI_FILES
