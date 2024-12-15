@@ -1,7 +1,7 @@
 #ifndef GAMEWIDGET_H
 #define GAMEWIDGET_H
 
-#include "Maze.h"
+#include "maze/Maze.h"
 
 #include <QWidget>
 #include <QGraphicsScene>

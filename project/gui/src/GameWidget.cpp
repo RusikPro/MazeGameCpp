@@ -1,5 +1,5 @@
-#include "GameWidget.h"
-#include "Constants.h"
+#include "gui/GameWidget.h"
+#include "common/Constants.h"
 
 #include <QGraphicsRectItem>
 #include <QPen>

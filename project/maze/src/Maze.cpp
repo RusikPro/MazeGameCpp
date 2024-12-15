@@ -1,6 +1,6 @@
-#include "Maze.h"
-#include "FlexibleIterator.h"
-#include "Constants.h"
+#include "maze/Maze.h"
+#include "common/Constants.h"
+#include "common/FlexibleIterator.h"
 
 #include <cstdlib>
 #include <ctime>

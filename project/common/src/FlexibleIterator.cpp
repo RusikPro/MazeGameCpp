@@ -1,6 +1,4 @@
-#include "FlexibleIterator.h"
-
-#include <iostream>
+#include "common/FlexibleIterator.h"
 
 /*----------------------------------------------------------------------------*/
 

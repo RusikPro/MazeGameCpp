@@ -1,4 +1,4 @@
-#include "GameWidget.h"
+#include "gui/GameWidget.h"
 #include <QApplication>
 #include <iostream>
 #include <cstdlib>
