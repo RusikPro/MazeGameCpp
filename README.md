@@ -224,6 +224,7 @@ Pressing the "Generate" button (or G on the keyboard) creates a new maze.
 - Add support for more pathfinding algorithms (e.g., A*).
 - Allow saving and loading mazes.
 - Fix timer to measure the player's time to solve the maze to restart after the maze is regenerated.
+- Refactor gui module.
 
 ---
 
