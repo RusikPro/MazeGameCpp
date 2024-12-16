@@ -2,6 +2,8 @@
 add_library(common STATIC
     include/common/FlexibleIterator.h
     include/common/Constants.h
+    include/common/Point.h
+    include/common/Timer.h
     src/FlexibleIterator.cpp
 )
 

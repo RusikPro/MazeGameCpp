@@ -1,5 +1,7 @@
 #include "gui/GameWidget.h"
+#include "pathfinding/PathFinder.h"
 #include "common/Constants.h"
+#include "common/Timer.h"
 
 #include <QGraphicsRectItem>
 #include <QPen>
@@ -20,9 +22,36 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     ,   maze( _mazeSize )
     ,   elapsedTime( 0 )
 {
+    m_pGenerateButton = std::make_unique< QPushButton >( "Generate", this );
+    m_pFindPathButton = std::make_unique< QPushButton >( "Find Path", this );
+
+    connect(
+            m_pGenerateButton.get()
+        ,   &QPushButton::clicked
+        ,   this
+        ,   &GameWidget::handleGenerateButton
+    );
+    connect(
+            m_pFindPathButton.get()
+        ,   &QPushButton::clicked
+        ,   this
+        ,   &GameWidget::handleFindPathButton
+    );
+
+    m_pMainLayout = std::make_unique< QVBoxLayout >(this);
+
+    QHBoxLayout * pButtonLayout = new QHBoxLayout();
+    pButtonLayout->addWidget( m_pGenerateButton.get() );
+    pButtonLayout->addWidget( m_pFindPathButton.get() );
+    pButtonLayout->addStretch();
+
+    m_pMainLayout->addLayout( pButtonLayout );
     setupScene();
-    drawMaze();
-    placePlayerAndDestination();
+    m_pMainLayout->addWidget( m_pView.get() );
+
+    setLayout( m_pMainLayout.get() );
+
+    generateNewMaze();
 
     // Enable keyboard focus
     setFocusPolicy( Qt::StrongFocus );
@@ -165,6 +194,18 @@ void GameWidget::placePlayerAndDestination ()
 
 void GameWidget::keyPressEvent ( QKeyEvent * event )
 {
+    if ( event->key() == Qt::Key_P )
+    {
+        visualizePath();
+        return;
+    }
+
+    if ( event->key() == Qt::Key_G )
+    {
+        generateNewMaze();
+        return;
+    }
+
     int newX = player.x;
     int newY = player.y;
 
@@ -198,6 +239,7 @@ void GameWidget::keyPressEvent ( QKeyEvent * event )
     {
         player.x = newX;
         player.y = newY;
+
         m_pPlayerItem->setRect(
                 player.x * m_cellSize + m_cellSize / 4
             ,   player.y * m_cellSize + m_cellSize / 4
@@ -228,6 +270,22 @@ void GameWidget::checkVictory ()
     }
 }
 
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::handleGenerateButton ()
+{
+    generateNewMaze();
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::handleFindPathButton ()
+{
+    visualizePath();
+}
+
+/*----------------------------------------------------------------------------*/
+
 void GameWidget::updateTimer ()
 {
     elapsedTime++;
@@ -235,5 +293,102 @@ void GameWidget::updateTimer ()
         QString( "Maze Game - Time: %1 seconds" ).arg( elapsedTime )
     );
 }
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::generateNewMaze ()
+{
+    {
+        maze.reset();
+        Timer< std::milli > timer( "maze.generateMaze" );
+        maze.generateMaze();
+    }
+
+    // Clear the scene
+    m_pScene->clear();
+
+    // Clear stored solution path
+    m_solutionPath.clear();
+
+    // Properly clean up path lines
+    m_pathLines.clear();
+
+    // Reset visualization flag
+    m_isPathVisualized = false;
+
+    // Reset player and destination positions
+    placePlayerAndDestination();
+
+    // Redraw the maze
+    drawMaze();
+
+    // Redraw the outer border
+    QPen borderPen(Qt::black);
+    borderPen.setWidth(2);
+    int mazeWidth = m_cellSize * maze.getSize();
+    int mazeHeight = m_cellSize * maze.getSize();
+    m_pScene->addRect(0, 0, mazeWidth, mazeHeight, borderPen);
+}
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::visualizePath ()
+{
+    if ( m_isPathVisualized )
+    {
+        // Remove path visualization
+        for (auto *line : m_pathLines)
+        {
+            m_pScene->removeItem(line);
+            delete line; // Clean up memory
+        }
+        m_pathLines.clear();
+        m_isPathVisualized = false;
+        return;
+    }
+
+    // If not visualized, compute or reuse path
+    if (m_solutionPath.empty())
+    {
+        // Create PathFinder instance
+        PathFinder pathFinder( maze );
+        Point start{player.x, player.y};
+        Point goal{maze.getSize() - 1, static_cast<int>(m_pDestinationItem->rect().y() / m_cellSize)};
+
+        try
+        {
+            Timer< std::milli > timer( "pathFinder.solve" );
+            m_solutionPath = pathFinder.solve( start, goal, true ); // BFS by default
+        }
+        catch (const std::exception &e)
+        {
+            QMessageBox::warning(this, "Pathfinder Error", e.what());
+            return;
+        }
+    }
+
+    // Visualize the path
+    QPen pathPen(Qt::blue);
+    pathPen.setWidth(3);
+
+    for (size_t i = 1; i < m_solutionPath.size(); ++i)
+    {
+        Point from = m_solutionPath[i - 1];
+        Point to = m_solutionPath[i];
+
+        QGraphicsLineItem *line = m_pScene->addLine(
+            from.x * m_cellSize + m_cellSize / 2,
+            from.y * m_cellSize + m_cellSize / 2,
+            to.x * m_cellSize + m_cellSize / 2,
+            to.y * m_cellSize + m_cellSize / 2,
+            pathPen
+        );
+
+        m_pathLines.push_back(line);
+    }
+
+    m_isPathVisualized = true; // Path is now visualized
+}
+
+
 
 /*----------------------------------------------------------------------------*/

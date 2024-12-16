@@ -3,10 +3,14 @@
 
 #include "maze/Maze.h"
 
+#include "common/Point.h"
+
 #include <QWidget>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsEllipseItem>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <QKeyEvent>
 #include <QTimer>
 
@@ -41,6 +45,18 @@ private:
     void placePlayerAndDestination ();
     void checkVictory ();
 
+    void generateNewMaze ();
+
+    void visualizePath ();
+
+private slots:
+
+    void handleGenerateButton ();
+    void handleFindPathButton ();
+    void updateTimer ();
+
+private:
+
     std::unique_ptr< QGraphicsScene > m_pScene;
     std::unique_ptr< QGraphicsView > m_pView;
 
@@ -54,8 +70,15 @@ private:
     int elapsedTime;
     int m_cellSize;
 
-private slots:
-    void updateTimer();
+    // Visualization mmembers
+    std::vector< Point > m_solutionPath;
+    std::vector< QGraphicsLineItem * > m_pathLines;
+    bool m_isPathVisualized = false;
+
+    // UI Elements for Buttons
+    std::unique_ptr< QPushButton > m_pGenerateButton;
+    std::unique_ptr< QPushButton > m_pFindPathButton;
+    std::unique_ptr< QVBoxLayout > m_pMainLayout;
 };
 
 /*----------------------------------------------------------------------------*/

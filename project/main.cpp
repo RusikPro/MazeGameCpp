@@ -1,13 +1,17 @@
 #include "gui/GameWidget.h"
+#include "common/Constants.h"
+
 #include <QApplication>
 #include <iostream>
 #include <cstdlib>
+
+/*----------------------------------------------------------------------------*/
 
 int main ( int argc, char *argv[] )
 {
     QApplication app( argc, argv );
 
-    int mazeSize = 30;
+    int mazeSize = DEFAULT_MAZE_SIZE;
 
     if ( argc > 1 )
     {
@@ -43,3 +47,5 @@ int main ( int argc, char *argv[] )
         return EXIT_FAILURE;
     }
 }
+
+/*----------------------------------------------------------------------------*/

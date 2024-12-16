@@ -28,6 +28,8 @@ public:
     int getSize () const;
     const Room& getRoom ( int x, int y ) const;
 
+    void reset ();
+
     void generateMaze (); // Generates the maze using Eller's algorithm
 
     void rotateGrid (

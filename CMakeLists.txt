@@ -22,6 +22,5 @@ add_executable(MazeGame
 target_link_libraries(MazeGame
     PRIVATE
     gui
-    maze
     Qt6::Widgets
 )

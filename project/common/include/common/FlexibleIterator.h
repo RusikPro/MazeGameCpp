@@ -16,10 +16,6 @@ public:
 
 private:
 
-    int m_initialStart;
-    int m_initialEnd;
-    int m_initialStep;
-
     int m_current;
     int m_end;
     int m_step;

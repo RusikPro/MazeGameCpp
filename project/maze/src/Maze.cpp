@@ -16,8 +16,7 @@ Maze::Maze ( int _size )
     ,   m_leftToRight( true )
 {
     validateSize();
-
-    generateMaze();
+    reset();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -52,6 +51,13 @@ int Maze::getSize () const
 const Room& Maze::getRoom ( int x, int y ) const
 {
     return m_grid[ y ][ x ];
+}
+
+/*----------------------------------------------------------------------------*/
+
+void Maze::reset ()
+{
+    m_grid = Grid( m_size, Rooms( m_size ) );
 }
 
 /*----------------------------------------------------------------------------*/

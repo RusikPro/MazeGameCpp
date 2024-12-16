@@ -2,3 +2,4 @@
 add_subdirectory(common)
 add_subdirectory(gui)
 add_subdirectory(maze)
+add_subdirectory(pathfinding)

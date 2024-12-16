@@ -8,7 +8,7 @@ add_library(gui STATIC
 )
 
 # Link to Maze module
-target_link_libraries(gui PUBLIC maze)
+target_link_libraries(gui PUBLIC maze pathfinding)
 
 # Link Qt Widgets library
 target_link_libraries(gui PRIVATE Qt6::Widgets)
