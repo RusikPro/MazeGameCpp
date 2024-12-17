@@ -4,8 +4,8 @@
 // Maze constraints
 constexpr int MAX_MAZE_SIZE = 100;           // Maximum allowed size for the maze
 constexpr int DEFAULT_MAZE_SIZE = 50;        // Default maze size if none provided
-constexpr int MAX_CELLS_FOR_SCALING = 60;    // Maximum cells for dynamic scaling
-constexpr int MAX_RENDER_SIZE = 700;        // Maximum render size of the maze
+constexpr int MAX_CELLS_FOR_SCALING = 70;    // Maximum cells for dynamic scaling
+constexpr int MAX_RENDER_SIZE = 1100;        // Maximum render size of the maze
 
 // Scene and rendering
 constexpr int SCENE_PADDING = 15;            // Padding around the scene

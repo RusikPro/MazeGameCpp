@@ -5,14 +5,14 @@
 
 #include "common/Point.h"
 
-#include <QWidget>
+#include <QGraphicsEllipseItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QGraphicsEllipseItem>
-#include <QPushButton>
-#include <QVBoxLayout>
 #include <QKeyEvent>
+#include <QPushButton>
 #include <QTimer>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include <memory>
 

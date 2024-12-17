@@ -3,16 +3,18 @@
 #include "common/Constants.h"
 #include "common/Timer.h"
 
-#include <QGraphicsRectItem>
-#include <QPen>
-#include <QBrush>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QMessageBox>
 #include <QApplication>
+#include <QBrush>
+#include <QGraphicsRectItem>
+#include <QGuiApplication>
+#include <QMessageBox>
+#include <QLabel>
+#include <QPen>
+#include <QScreen>
+#include <QVBoxLayout>
+
 #include <cstdlib>
 #include <ctime>
-
 #include <iostream>
 
 /*----------------------------------------------------------------------------*/
@@ -73,31 +75,49 @@ GameWidget::~GameWidget ()
 
 void GameWidget::setupScene ()
 {
-    // Calculate the cell size dynamically based on maze size
-    m_cellSize = MAX_RENDER_SIZE / std::max( maze.getSize(), MAX_CELLS_FOR_SCALING );
+    QScreen * screen = QGuiApplication::primaryScreen();
+    QRect screenGeometry = screen->availableGeometry();
 
-    // Calculate the actual maze width and height
-    int const mazeWidth = m_cellSize * maze.getSize();
-    int const mazeHeight = m_cellSize * maze.getSize();
+    int screenWidth = screenGeometry.width();
+    int screenHeight = screenGeometry.height();
+
+    int dynamicRenderSize = std::min(
+        { MAX_RENDER_SIZE, screenWidth - 50, screenHeight - 100 }
+    );
+
+    m_cellSize
+        = dynamicRenderSize / std::max( maze.getSize(), MAX_CELLS_FOR_SCALING )
+    ;
+
+    // Calculate actual maze dimensions
+    int mazeWidth = m_cellSize * maze.getSize();
+    int mazeHeight = m_cellSize * maze.getSize();
+
+    // Ensure the maze dimensions do not exceed the adjusted render size
+    int adjustedMazeWidth = std::min( mazeWidth, dynamicRenderSize );
+    int adjustedMazeHeight = std::min( mazeHeight, dynamicRenderSize );
 
     // Create the scene with padding
-    m_pScene = std::make_unique< QGraphicsScene >( this );
+    m_pScene = std::make_unique<QGraphicsScene>( this );
     m_pScene->setSceneRect(
-        -SCENE_PADDING, -SCENE_PADDING, mazeWidth + SCENE_PADDING * 2, mazeHeight + SCENE_PADDING * 2
+        -SCENE_PADDING, -SCENE_PADDING,
+        adjustedMazeWidth + SCENE_PADDING * 2,
+        adjustedMazeHeight + SCENE_PADDING * 2
     );
 
     // Create the view
     m_pView = std::make_unique< QGraphicsView >( m_pScene.get(), this );
     m_pView->setFixedSize(
-        mazeWidth + SCENE_PADDING * 2 + BORDER_WIDTH, mazeHeight + SCENE_PADDING * 2 + BORDER_WIDTH
+        adjustedMazeWidth + SCENE_PADDING * 2 + BORDER_WIDTH,
+        adjustedMazeHeight + SCENE_PADDING * 2 + BORDER_WIDTH
     );
     m_pView->setRenderHint( QPainter::Antialiasing );
-    m_pView->setParent( this );
+    m_pView->setParent(this);
 
     // Draw the outer border
     QPen borderPen( Qt::black );
-    borderPen.setWidth( 2 );
-    m_pScene->addRect( 0, 0, mazeWidth, mazeHeight, borderPen );
+    borderPen.setWidth( BORDER_WIDTH );
+    m_pScene->addRect( 0, 0, adjustedMazeWidth, adjustedMazeHeight, borderPen );
 }
 
 /*----------------------------------------------------------------------------*/
