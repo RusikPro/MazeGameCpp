@@ -40,21 +40,30 @@ public:
 
 /*----------------------------------------------------------------------------*/
 
-class StackFrontier : public Frontier
+class BaseFrontier
+    :   public Frontier
 {
-private:
-    std::vector< Node * > frontier;
-
 public:
-    void add ( Node * node ) override { frontier.push_back( node ); }
-    Node * remove () override;
-    bool empty () const override { return frontier.empty(); }
     bool contains ( Point const & _state ) const override;
+
+protected:
+    std::vector< Node * > frontier;
 };
 
 /*----------------------------------------------------------------------------*/
 
-class QueueFrontier : public Frontier
+class StackFrontier : public BaseFrontier
+{
+
+public:
+    void add ( Node * node ) override { frontier.push_back( node ); }
+    Node * remove () override;
+    bool empty () const override { return frontier.empty(); }
+};
+
+/*----------------------------------------------------------------------------*/
+
+class QueueFrontier : public BaseFrontier
 {
 private:
     std::vector< Node * > frontier;
@@ -63,7 +72,6 @@ public:
     void add ( Node * node ) override { frontier.push_back( node ); }
     Node * remove () override;
     bool empty () const override { return frontier.empty(); }
-    bool contains ( Point const & _state ) const override;
 };
 
 /*----------------------------------------------------------------------------*/

@@ -5,18 +5,7 @@
 
 /*----------------------------------------------------------------------------*/
 
-Node * StackFrontier::remove ()
-{
-    if ( empty() )
-        throw std::runtime_error( "Frontier is empty!" );
-    Node * node = frontier.back();
-    frontier.pop_back();
-    return node;
-}
-
-/*----------------------------------------------------------------------------*/
-
-bool StackFrontier::contains ( Point const & _state ) const
+bool BaseFrontier::contains ( Point const & _state ) const
 {
     for ( auto const * node : frontier )
     {
@@ -28,6 +17,17 @@ bool StackFrontier::contains ( Point const & _state ) const
 
 /*----------------------------------------------------------------------------*/
 
+Node * StackFrontier::remove ()
+{
+    if ( empty() )
+        throw std::runtime_error( "Frontier is empty!" );
+    Node * node = frontier.back();
+    frontier.pop_back();
+    return node;
+}
+
+/*----------------------------------------------------------------------------*/
+
 Node * QueueFrontier::remove ()
 {
     if ( empty() )
@@ -35,18 +35,6 @@ Node * QueueFrontier::remove ()
     Node *node = frontier.front();
     frontier.erase( frontier.begin() );
     return node;
-}
-
-/*----------------------------------------------------------------------------*/
-
-bool QueueFrontier::contains ( Point const & _state ) const
-{
-    for ( auto const * node : frontier )
-    {
-        if (node->state == _state)
-            return true;
-    }
-    return false;
 }
 
 /*----------------------------------------------------------------------------*/
