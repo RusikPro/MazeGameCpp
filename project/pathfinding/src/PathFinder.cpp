@@ -7,7 +7,7 @@
 
 bool BaseFrontier::contains ( Point const & _state ) const
 {
-    for ( auto const * node : frontier )
+    for ( auto node : frontier )
     {
         if ( node->state == _state )
             return true;
@@ -17,22 +17,22 @@ bool BaseFrontier::contains ( Point const & _state ) const
 
 /*----------------------------------------------------------------------------*/
 
-Node * StackFrontier::remove ()
+NodePtr StackFrontier::remove ()
 {
     if ( empty() )
         throw std::runtime_error( "Frontier is empty!" );
-    Node * node = frontier.back();
+    NodePtr node = frontier.back();
     frontier.pop_back();
     return node;
 }
 
 /*----------------------------------------------------------------------------*/
 
-Node * QueueFrontier::remove ()
+NodePtr QueueFrontier::remove ()
 {
     if ( empty() )
         throw std::runtime_error( "Frontier is empty!" );
-    Node *node = frontier.front();
+    auto node = frontier.front();
     frontier.erase( frontier.begin() );
     return node;
 }
@@ -78,19 +78,19 @@ PathFinder::Path PathFinder::solve ( Point _start, Point _goal, bool _useBFS )
     else
         frontier = std::make_unique< StackFrontier >();
 
-    Node * startNode = new Node( _start, nullptr );
+    auto startNode = std::make_shared< Node >( _start, nullptr );
     frontier->add(startNode);
 
     std::unordered_set< Point > explored;
 
     while ( !frontier->empty() )
     {
-        Node * node = frontier->remove();
+        NodePtr node = frontier->remove();
 
         if ( node->state == _goal )
         {
             Path path;
-            Node * current = node;
+            NodePtr current = node;
             while ( current )
             {
                 path.push_back( current->state );
@@ -108,7 +108,7 @@ PathFinder::Path PathFinder::solve ( Point _start, Point _goal, bool _useBFS )
                 &&  explored.find( neighbor ) == explored.end()
             )
             {
-                Node * child = new Node( neighbor, node );
+                auto child = std::make_shared< Node >( neighbor, node );
                 frontier->add(child);
             }
         }

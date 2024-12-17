@@ -13,13 +13,18 @@
 
 /*----------------------------------------------------------------------------*/
 
+class Node;
+using NodePtr = std::shared_ptr< Node >;
+
+/*----------------------------------------------------------------------------*/
+
 class Node
 {
 public:
     Point state;
-    Node * parent;
+    NodePtr parent;
 
-    Node ( Point _state, Node * _pParent )
+    Node ( Point _state, NodePtr _pParent )
         :   state( _state )
         ,   parent( _pParent )
     {
@@ -31,8 +36,8 @@ public:
 class Frontier
 {
 public:
-    virtual void add ( Node * node ) = 0;
-    virtual Node * remove () = 0;
+    virtual void add ( NodePtr node ) = 0;
+    virtual NodePtr remove () = 0;
     virtual bool empty () const = 0;
     virtual bool contains ( Point const & _state ) const = 0;
     virtual ~Frontier() = default;
@@ -47,7 +52,7 @@ public:
     bool contains ( Point const & _state ) const override;
 
 protected:
-    std::vector< Node * > frontier;
+    std::vector< NodePtr > frontier;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -56,8 +61,8 @@ class StackFrontier : public BaseFrontier
 {
 
 public:
-    void add ( Node * node ) override { frontier.push_back( node ); }
-    Node * remove () override;
+    void add ( NodePtr node ) override { frontier.push_back( node ); }
+    NodePtr remove () override;
     bool empty () const override { return frontier.empty(); }
 };
 
@@ -66,11 +71,11 @@ public:
 class QueueFrontier : public BaseFrontier
 {
 private:
-    std::vector< Node * > frontier;
+    std::vector< NodePtr > frontier;
 
 public:
-    void add ( Node * node ) override { frontier.push_back( node ); }
-    Node * remove () override;
+    void add ( NodePtr node ) override { frontier.push_back( node ); }
+    NodePtr remove () override;
     bool empty () const override { return frontier.empty(); }
 };
 
