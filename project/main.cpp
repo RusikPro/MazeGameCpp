@@ -20,25 +20,27 @@ int main ( int argc, char *argv[] )
             mazeSize = std::stoi( argv[ 1 ] );
             if ( mazeSize <= 0 )
             {
-                throw std::invalid_argument( "Maze size must be a positive integer." );
+                throw std::invalid_argument(
+                    "Maze size must be a positive integer."
+                );
             }
         }
-        catch ( const std::exception &e )
+        catch ( std::exception const & _e )
         {
-            std::cerr << "Error: " << e.what() << std::endl;
+            std::cerr << "Error: " << _e.what() << std::endl;
             return EXIT_FAILURE;
         }
     }
 
     try
     {
-        GameWidget widget( mazeSize );
+        gui::GameWidget widget( mazeSize );
         widget.show();
         return app.exec();
     }
-    catch ( const std::exception &e )
+    catch ( std::exception const & _e )
     {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Error: " << _e.what() << std::endl;
         return EXIT_FAILURE;
     }
     catch ( ... )

@@ -19,6 +19,10 @@
 
 /*----------------------------------------------------------------------------*/
 
+namespace gui {
+
+/*----------------------------------------------------------------------------*/
+
 GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     :   QWidget( parent )
     ,   maze( _mazeSize )
@@ -131,7 +135,7 @@ void GameWidget::drawMaze ()
     {
         for ( int x = 0; x < maze.getSize(); ++x )
         {
-            Room const & room = maze.getRoom( x, y );
+            auto const & room = maze.getRoom( x, y );
 
             // Top wall
             if ( room.walls[ TOP_WALL ] )
@@ -212,15 +216,15 @@ void GameWidget::placePlayerAndDestination ()
 
 /*----------------------------------------------------------------------------*/
 
-void GameWidget::keyPressEvent ( QKeyEvent * event )
+void GameWidget::keyPressEvent ( QKeyEvent * _event )
 {
-    if ( event->key() == Qt::Key_P )
+    if ( _event->key() == Qt::Key_P )
     {
         visualizePath();
         return;
     }
 
-    if ( event->key() == Qt::Key_G )
+    if ( _event->key() == Qt::Key_G )
     {
         generateNewMaze();
         return;
@@ -230,23 +234,23 @@ void GameWidget::keyPressEvent ( QKeyEvent * event )
     int newY = player.y;
 
     // Determine new position based on key press
-    if (    event->key() == Qt::Key_Up
+    if (    _event->key() == Qt::Key_Up
         &&  !maze.getRoom( player.x, player.y ).walls[ TOP_WALL ]
     )
     {
         newY--;
     }
-    else if (   event->key() == Qt::Key_Down
+    else if (   _event->key() == Qt::Key_Down
             &&  !maze.getRoom( player.x, player.y ).walls[ BOTTOM_WALL ] )
     {
         newY++;
     }
-    else if (   event->key() == Qt::Key_Left
+    else if (   _event->key() == Qt::Key_Left
             &&  !maze.getRoom( player.x, player.y ).walls[ LEFT_WALL ] )
     {
         newX--;
     }
-    else if (   event->key() == Qt::Key_Right
+    else if (   _event->key() == Qt::Key_Right
             &&  !maze.getRoom( player.x, player.y ).walls[ RIGHT_WALL ] )
     {
         newX++;
@@ -356,10 +360,10 @@ void GameWidget::visualizePath ()
     if ( m_isPathVisualized )
     {
         // Remove path visualization
-        for (auto *line : m_pathLines)
+        for ( auto * pLine : m_pathLines )
         {
-            m_pScene->removeItem(line);
-            delete line; // Clean up memory
+            m_pScene->removeItem( pLine );
+            delete pLine;
         }
         m_pathLines.clear();
         m_isPathVisualized = false;
@@ -367,12 +371,16 @@ void GameWidget::visualizePath ()
     }
 
     // If not visualized, compute or reuse path
-    if (m_solutionPath.empty())
+    if ( m_solutionPath.empty() )
     {
-        // Create PathFinder instance
-        PathFinder pathFinder( maze );
-        Point start{player.x, player.y};
-        Point goal{maze.getSize() - 1, static_cast<int>(m_pDestinationItem->rect().y() / m_cellSize)};
+        pathfinding::PathFinder pathFinder( maze );
+        Point start{ player.x, player.y };
+        Point goal{
+                maze.getSize() - 1
+            ,   static_cast< int >(
+                    m_pDestinationItem->rect().y() / m_cellSize
+                )
+        };
 
         try
         {
@@ -381,21 +389,21 @@ void GameWidget::visualizePath ()
         }
         catch (const std::exception &e)
         {
-            QMessageBox::warning(this, "Pathfinder Error", e.what());
+            QMessageBox::warning( this, "Pathfinder Error", e.what() );
             return;
         }
     }
 
     // Visualize the path
-    QPen pathPen(Qt::blue);
-    pathPen.setWidth(3);
+    QPen pathPen( Qt::blue );
+    pathPen.setWidth( PATH_WIDTH );
 
     for (size_t i = 1; i < m_solutionPath.size(); ++i)
     {
         Point from = m_solutionPath[i - 1];
         Point to = m_solutionPath[i];
 
-        QGraphicsLineItem *line = m_pScene->addLine(
+        QGraphicsLineItem * line = m_pScene->addLine(
             from.x * m_cellSize + m_cellSize / 2,
             from.y * m_cellSize + m_cellSize / 2,
             to.x * m_cellSize + m_cellSize / 2,
@@ -403,12 +411,14 @@ void GameWidget::visualizePath ()
             pathPen
         );
 
-        m_pathLines.push_back(line);
+        m_pathLines.push_back( line );
     }
 
     m_isPathVisualized = true; // Path is now visualized
 }
 
+/*----------------------------------------------------------------------------*/
 
+} // namespace gui
 
 /*----------------------------------------------------------------------------*/

@@ -1,7 +1,12 @@
 #include "pathfinding/PathFinder.h"
+#include "maze/Maze.h"
 #include "common/Constants.h"
 #include <algorithm>
 #include <iostream>
+
+/*----------------------------------------------------------------------------*/
+
+namespace pathfinding {
 
 /*----------------------------------------------------------------------------*/
 
@@ -39,7 +44,7 @@ NodePtr QueueFrontier::remove ()
 
 /*----------------------------------------------------------------------------*/
 
-PathFinder::PathFinder ( Maze const & _maze )
+PathFinder::PathFinder ( maze::Maze const & _maze )
     :   m_maze( _maze )
     ,   m_size( _maze.getSize() )
 {
@@ -50,7 +55,7 @@ PathFinder::PathFinder ( Maze const & _maze )
 std::vector<  Point > PathFinder::neighbors ( Point _state )
 {
     std::vector< Point > result;
-    const Room &room = m_maze.getRoom(_state.x, _state.y);
+    auto const & room = m_maze.getRoom( _state.x, _state.y );
 
     if ( !room.walls[ TOP_WALL ] && _state.y > 0 )
         result.emplace_back( Point{ _state.x, _state.y - 1 } );
@@ -71,7 +76,7 @@ std::vector<  Point > PathFinder::neighbors ( Point _state )
 
 PathFinder::Path PathFinder::solve ( Point _start, Point _goal, bool _useBFS )
 {
-    std::unique_ptr<Frontier> frontier;
+    std::unique_ptr< Frontier > frontier;
 
     if ( _useBFS )
         frontier = std::make_unique< QueueFrontier >();
@@ -116,5 +121,9 @@ PathFinder::Path PathFinder::solve ( Point _start, Point _goal, bool _useBFS )
 
     throw std::runtime_error( "No solution found!" );
 }
+
+/*----------------------------------------------------------------------------*/
+
+} // namespace pathfinding
 
 /*----------------------------------------------------------------------------*/

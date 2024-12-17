@@ -6,7 +6,8 @@ FlexibleIterator::FlexibleIterator ( int _size, bool _forward )
     :   m_current( _forward ? 0 : _size - 1 )
     ,   m_end( _forward ? _size : 0 )
     ,   m_step( _forward ? 1 : -1 )
-{}
+{
+}
 
 /*----------------------------------------------------------------------------*/
 

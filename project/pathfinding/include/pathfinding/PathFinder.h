@@ -3,13 +3,24 @@
 
 /*----------------------------------------------------------------------------*/
 
-#include "maze/Maze.h"
 #include "common/Point.h"
 
 #include <memory>
 #include <string>
 #include <unordered_set>
 #include <vector>
+
+/*----------------------------------------------------------------------------*/
+
+namespace maze {
+
+class Maze;
+
+} // namespace maze
+
+/*----------------------------------------------------------------------------*/
+
+namespace pathfinding {
 
 /*----------------------------------------------------------------------------*/
 
@@ -84,16 +95,22 @@ public:
 class PathFinder
 {
 public:
-    using Path = std::vector<Point>;
+    using Path = std::vector< Point >;
 
-    explicit PathFinder(const Maze &maze);
-    Path solve(Point start, Point goal, bool useBFS);
+    explicit PathFinder ( maze::Maze const & _maze );
+    Path solve ( Point _start, Point _goal, bool useBFS );
 
 private:
-    const Maze &m_maze;
+    maze::Maze const & m_maze;
     int m_size;
 
     std::vector< Point > neighbors ( Point _state );
 };
+
+/*----------------------------------------------------------------------------*/
+
+} // namespace pathfinding
+
+/*----------------------------------------------------------------------------*/
 
 #endif // PATHFINDER_H

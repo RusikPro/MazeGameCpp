@@ -1,8 +1,9 @@
 #ifndef GAMEWIDGET_H
 #define GAMEWIDGET_H
 
-#include "maze/Maze.h"
+/*----------------------------------------------------------------------------*/
 
+#include "maze/Maze.h"
 #include "common/Point.h"
 
 #include <QGraphicsEllipseItem>
@@ -15,6 +16,10 @@
 #include <QWidget>
 
 #include <memory>
+
+/*----------------------------------------------------------------------------*/
+
+namespace gui {
 
 /*----------------------------------------------------------------------------*/
 
@@ -63,7 +68,7 @@ private:
     QGraphicsEllipseItem * m_pPlayerItem;
     QGraphicsRectItem * m_pDestinationItem;
 
-    Maze maze;
+    maze::Maze maze;
     Player player;
 
     std::unique_ptr< QTimer > m_pTimer;
@@ -80,6 +85,10 @@ private:
     std::unique_ptr< QPushButton > m_pFindPathButton;
     std::unique_ptr< QVBoxLayout > m_pMainLayout;
 };
+
+/*----------------------------------------------------------------------------*/
+
+} // namespace gui
 
 /*----------------------------------------------------------------------------*/
 
