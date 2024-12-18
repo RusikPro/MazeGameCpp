@@ -32,13 +32,13 @@ void KruskalMaze::generateEdges ()
 
 /*----------------------------------------------------------------------------*/
 
-void KruskalMaze::generateMaze()
+void KruskalMaze::generateMaze ()
 {
     generateEdges();
 
     // Step 1: Shuffle edges
     std::random_device rd;
-    std::mt19937 g(rd());
+    std::mt19937 g( rd() );
     std::shuffle( m_edges.begin(), m_edges.end(), g );
 
     // Step 2: Initialize Union-Find
@@ -112,9 +112,9 @@ void KruskalMaze::UnionFind::unite ( int _x, int _y )
 
     if ( rootX != rootY )
     {
-        if (rank[ rootX ] < rank[ rootY ] )
+        if ( rank[ rootX ] < rank[ rootY ] )
             parent[ rootX ] = rootY;
-        else if (rank[ rootX ] > rank[ rootY ] )
+        else if ( rank[ rootX ] > rank[ rootY ] )
             parent[ rootY ] = rootX;
         else
         {
