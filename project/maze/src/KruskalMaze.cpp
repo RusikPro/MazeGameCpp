@@ -34,7 +34,6 @@ void KruskalMaze::generateEdges ()
 
 void KruskalMaze::generateMaze()
 {
-    reset();
     generateEdges();
 
     // Step 1: Shuffle edges
@@ -48,8 +47,8 @@ void KruskalMaze::generateMaze()
     // Step 3: Process edges
     for ( auto const & edge : m_edges )
     {
-        int id1 = cellToId( edge.cell1.first, edge.cell1.second );
-        int id2 = cellToId( edge.cell2.first, edge.cell2.second );
+        int id1 = cellToId( edge.cell1.x, edge.cell1.y );
+        int id2 = cellToId( edge.cell2.x, edge.cell2.y );
 
         if ( uf.find( id1 ) != uf.find( id2 ) )
         {
@@ -70,18 +69,18 @@ int KruskalMaze::cellToId ( int _x, int _y ) const
 
 void KruskalMaze::removeWall ( Edge const & _edge )
 {
-    int dx = _edge.cell2.first - _edge.cell1.first;
-    int dy = _edge.cell2.second - _edge.cell1.second;
+    int dx = _edge.cell2.x - _edge.cell1.x;
+    int dy = _edge.cell2.y - _edge.cell1.y;
 
     if ( dx == 1 ) // Right wall
     {
-        m_grid[ _edge.cell1.second ][ _edge.cell1.first ].walls[ RIGHT_WALL ] = false;
-        m_grid[ _edge.cell2.second ][ _edge.cell2.first ].walls[ LEFT_WALL ] = false;
+        m_grid[ _edge.cell1.y ][ _edge.cell1.x ].walls[ RIGHT_WALL ] = false;
+        m_grid[ _edge.cell2.y ][ _edge.cell2.x ].walls[ LEFT_WALL ] = false;
     }
     else if ( dy == 1 ) // Bottom wall
     {
-        m_grid[ _edge.cell1.second ][ _edge.cell1.first ].walls[ BOTTOM_WALL ] = false;
-        m_grid[ _edge.cell2.second ][ _edge.cell2.first ].walls[ TOP_WALL ] = false;
+        m_grid[ _edge.cell1.y ][ _edge.cell1.x ].walls[ BOTTOM_WALL ] = false;
+        m_grid[ _edge.cell2.y ][ _edge.cell2.x ].walls[ TOP_WALL ] = false;
     }
 }
 

@@ -4,6 +4,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "BaseMaze.h"
+#include "common/Point.h"
 
 #include <random>
 #include <algorithm>
@@ -30,8 +31,8 @@ private:
 
     struct Edge
     {
-        std::pair< int, int > cell1;
-        std::pair< int, int > cell2;
+        Point cell1;
+        Point cell2;
     };
 
     class UnionFind
