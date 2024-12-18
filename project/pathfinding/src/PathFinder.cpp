@@ -1,5 +1,5 @@
 #include "pathfinding/PathFinder.h"
-#include "maze/Maze.h"
+#include "maze/IMaze.h"
 #include "common/Constants.h"
 #include <algorithm>
 #include <iostream>
@@ -44,7 +44,7 @@ NodePtr QueueFrontier::remove ()
 
 /*----------------------------------------------------------------------------*/
 
-PathFinder::PathFinder ( maze::Maze const & _maze )
+PathFinder::PathFinder ( maze::IMaze const & _maze )
     :   m_maze( _maze )
     ,   m_size( _maze.getSize() )
 {

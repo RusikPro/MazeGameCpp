@@ -1,20 +1,13 @@
-#ifndef __MAZE__MAZE_H
-#define MAZE_H
+#ifndef ELLERMAZE_H
+#define ELLERMAZE_H
 
 /*----------------------------------------------------------------------------*/
 
-#include <vector>
+#include "BaseMaze.h"
 
 /*----------------------------------------------------------------------------*/
 
 namespace maze {
-
-/*----------------------------------------------------------------------------*/
-
-struct Room
-{
-    bool walls[ 4 ] = { true, true, true, true }; // {top, right, bottom, left}
-};
 
 /*----------------------------------------------------------------------------*/
 
@@ -26,32 +19,25 @@ enum class RotationDirection
 
 /*----------------------------------------------------------------------------*/
 
-class Maze
+class EllerMaze final
+    :   public BaseMaze
 {
 public:
 
-    using Rooms = std::vector< Room >;
-    using Grid = std::vector< Rooms >;
+    EllerMaze ( int _size );
+
+    void generateMaze () override;
+
+    std::string algoName () const override { return "Eller"; }
+
+private:
+
     using RowSets = std::vector< int >;
-
-    Maze ( int _size );
-
-    Grid const & getGrid () const;
-    int getSize () const;
-    const Room& getRoom ( int x, int y ) const;
-
-    void reset ();
-
-    void generateMaze ();
 
     void rotateGrid (
             RotationDirection direction = RotationDirection::Clockwise
         ,   int times = 1
     );
-
-private:
-
-    void validateSize () const;
 
     void initializeRowSets ( RowSets & _rowSets, int & _nextSetId ) const;
     void mergeHorizontalWalls ( int _row, RowSets & _rowSets );
@@ -60,9 +46,6 @@ private:
     void handleTheLastRow ( RowSets & _rowSets );
 
 private:
-
-    int m_size;
-    Grid m_grid;
 
     bool m_leftToRight;
 };
@@ -73,4 +56,4 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
-#endif // MAZE_H
+#endif // ELLERMAZE_H

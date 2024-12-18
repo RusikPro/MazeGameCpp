@@ -1,7 +1,17 @@
 # Add the Maze module
 add_library(maze STATIC
-    include/maze/Maze.h
-    src/Maze.cpp
+    include/maze/IMaze.h
+    include/maze/IMazeFactory.h
+
+    src/MazeFactory.h
+    src/BaseMaze.h
+    src/KruskalMaze.h
+    src/EllerMaze.h
+
+    src/MazeFactory.cpp
+    src/BaseMaze.cpp
+    src/EllerMaze.cpp
+    src/KruskalMaze.cpp
 )
 
 # Link the Common library to Maze

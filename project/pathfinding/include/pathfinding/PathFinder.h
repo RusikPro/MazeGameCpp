@@ -14,7 +14,7 @@
 
 namespace maze {
 
-class Maze;
+class IMaze;
 
 } // namespace maze
 
@@ -97,11 +97,11 @@ class PathFinder
 public:
     using Path = std::vector< Point >;
 
-    explicit PathFinder ( maze::Maze const & _maze );
+    explicit PathFinder ( maze::IMaze const & _maze );
     Path solve ( Point _start, Point _goal, bool useBFS );
 
 private:
-    maze::Maze const & m_maze;
+    maze::IMaze const & m_maze;
     int m_size;
 
     std::vector< Point > neighbors ( Point _state );

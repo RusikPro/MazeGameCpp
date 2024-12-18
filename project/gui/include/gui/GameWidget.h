@@ -1,9 +1,9 @@
-#ifndef GAMEWIDGET_H
-#define GAMEWIDGET_H
+#ifndef __GUI_INCLUDE__GAMEWIDGET_H__
+#define __GUI_INCLUDE__GAMEWIDGET_H__
 
 /*----------------------------------------------------------------------------*/
 
-#include "maze/Maze.h"
+#include "maze/IMaze.h"
 #include "common/Point.h"
 
 #include <QGraphicsEllipseItem>
@@ -56,7 +56,8 @@ private:
 
 private slots:
 
-    void handleGenerateButton ();
+    void handleGenerateKruskalButton ();
+    void handleGenerateEllerButton ();
     void handleFindPathButton ();
     void updateTimer ();
 
@@ -68,7 +69,11 @@ private:
     QGraphicsEllipseItem * m_pPlayerItem;
     QGraphicsRectItem * m_pDestinationItem;
 
-    maze::Maze maze;
+    maze::IMaze * m_pMaze; // Current maze
+    std::unique_ptr< maze::IMaze > m_pKruskalMaze;
+    std::unique_ptr< maze::IMaze > m_pEllerMaze;
+
+
     Player player;
 
     std::unique_ptr< QTimer > m_pTimer;
@@ -81,7 +86,8 @@ private:
     bool m_isPathVisualized = false;
 
     // UI Elements for Buttons
-    std::unique_ptr< QPushButton > m_pGenerateButton;
+    std::unique_ptr< QPushButton > m_pGenerateKruskalButton;
+    std::unique_ptr< QPushButton > m_pGenerateEllerButton;
     std::unique_ptr< QPushButton > m_pFindPathButton;
     std::unique_ptr< QVBoxLayout > m_pMainLayout;
 };
@@ -92,4 +98,4 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
-#endif // GAMEWIDGET_H
+#endif // __GUI_INCLUDE__GAMEWIDGET_H__

@@ -1,4 +1,6 @@
 #include "gui/GameWidget.h"
+#include "maze/IMazeFactory.h"
+
 #include "pathfinding/PathFinder.h"
 #include "common/Constants.h"
 #include "common/Timer.h"
@@ -25,17 +27,30 @@ namespace gui {
 
 GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     :   QWidget( parent )
-    ,   maze( _mazeSize )
+    ,   m_pMaze( nullptr )
     ,   elapsedTime( 0 )
 {
-    m_pGenerateButton = std::make_unique< QPushButton >( "Generate", this );
+    auto mazeFactory = maze::IMazeFactory::createFactory();
+    m_pKruskalMaze = mazeFactory->createMaze( maze::MazeAlgo::Kruskal, _mazeSize );
+    m_pEllerMaze = mazeFactory->createMaze( maze::MazeAlgo::Eller, _mazeSize );
+
+    m_pMaze = m_pKruskalMaze.get();
+
+    m_pGenerateKruskalButton = std::make_unique< QPushButton >( "Generate (Kruskal)", this );
+    m_pGenerateEllerButton = std::make_unique< QPushButton >( "Generate (Eller)", this );
     m_pFindPathButton = std::make_unique< QPushButton >( "Find Path", this );
 
     connect(
-            m_pGenerateButton.get()
+            m_pGenerateKruskalButton.get()
         ,   &QPushButton::clicked
         ,   this
-        ,   &GameWidget::handleGenerateButton
+        ,   &GameWidget::handleGenerateKruskalButton
+    );
+    connect(
+            m_pGenerateEllerButton.get()
+        ,   &QPushButton::clicked
+        ,   this
+        ,   &GameWidget::handleGenerateEllerButton
     );
     connect(
             m_pFindPathButton.get()
@@ -47,7 +62,8 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     m_pMainLayout = std::make_unique< QVBoxLayout >(this);
 
     QHBoxLayout * pButtonLayout = new QHBoxLayout();
-    pButtonLayout->addWidget( m_pGenerateButton.get() );
+    pButtonLayout->addWidget( m_pGenerateKruskalButton.get() );
+    pButtonLayout->addWidget( m_pGenerateEllerButton.get() );
     pButtonLayout->addWidget( m_pFindPathButton.get() );
     pButtonLayout->addStretch();
 
@@ -90,12 +106,12 @@ void GameWidget::setupScene ()
     );
 
     m_cellSize
-        = dynamicRenderSize / std::max( maze.getSize(), MAX_CELLS_FOR_SCALING )
+        = dynamicRenderSize / std::max( m_pMaze->getSize(), MAX_CELLS_FOR_SCALING )
     ;
 
     // Calculate actual maze dimensions
-    int mazeWidth = m_cellSize * maze.getSize();
-    int mazeHeight = m_cellSize * maze.getSize();
+    int mazeWidth = m_cellSize * m_pMaze->getSize();
+    int mazeHeight = m_cellSize * m_pMaze->getSize();
 
     // Ensure the maze dimensions do not exceed the adjusted render size
     int adjustedMazeWidth = std::min( mazeWidth, dynamicRenderSize );
@@ -131,11 +147,11 @@ void GameWidget::drawMaze ()
     QPen wallPen( Qt::black );
     wallPen.setWidth( BORDER_WIDTH );
 
-    for ( int y = 0; y < maze.getSize(); ++y )
+    for ( int y = 0; y < m_pMaze->getSize(); ++y )
     {
-        for ( int x = 0; x < maze.getSize(); ++x )
+        for ( int x = 0; x < m_pMaze->getSize(); ++x )
         {
-            auto const & room = maze.getRoom( x, y );
+            auto const & room = m_pMaze->getRoom( x, y );
 
             // Top wall
             if ( room.walls[ TOP_WALL ] )
@@ -192,7 +208,7 @@ void GameWidget::placePlayerAndDestination ()
     // Place the player randomly on the left side
     srand( static_cast< unsigned >( time( nullptr ) ) );
     player.x = 0;
-    player.y = rand() % maze.getSize();
+    player.y = rand() % m_pMaze->getSize();
     m_pPlayerItem = m_pScene->addEllipse(
             player.x * m_cellSize + m_cellSize / CELL_MARGIN_FACTOR
         ,   player.y * m_cellSize + m_cellSize / CELL_MARGIN_FACTOR
@@ -203,9 +219,9 @@ void GameWidget::placePlayerAndDestination ()
     );
 
     // Place the destination randomly on the right side
-    int destY = rand() % maze.getSize();
+    int destY = rand() % m_pMaze->getSize();
     m_pDestinationItem = m_pScene->addRect(
-            ( maze.getSize() - 1 ) * m_cellSize
+            ( m_pMaze->getSize() - 1 ) * m_cellSize
         ,   destY * m_cellSize
         ,   m_cellSize
         ,   m_cellSize
@@ -224,10 +240,14 @@ void GameWidget::keyPressEvent ( QKeyEvent * _event )
         return;
     }
 
-    if ( _event->key() == Qt::Key_G )
+    if ( _event->key() == Qt::Key_K )
     {
-        generateNewMaze();
+        handleGenerateKruskalButton();
         return;
+    }
+    else if ( _event->key() == Qt::Key_E )
+    {
+        handleGenerateEllerButton();
     }
 
     int newX = player.x;
@@ -235,30 +255,30 @@ void GameWidget::keyPressEvent ( QKeyEvent * _event )
 
     // Determine new position based on key press
     if (    _event->key() == Qt::Key_Up
-        &&  !maze.getRoom( player.x, player.y ).walls[ TOP_WALL ]
+        &&  !m_pMaze->getRoom( player.x, player.y ).walls[ TOP_WALL ]
     )
     {
         newY--;
     }
     else if (   _event->key() == Qt::Key_Down
-            &&  !maze.getRoom( player.x, player.y ).walls[ BOTTOM_WALL ] )
+            &&  !m_pMaze->getRoom( player.x, player.y ).walls[ BOTTOM_WALL ] )
     {
         newY++;
     }
     else if (   _event->key() == Qt::Key_Left
-            &&  !maze.getRoom( player.x, player.y ).walls[ LEFT_WALL ] )
+            &&  !m_pMaze->getRoom( player.x, player.y ).walls[ LEFT_WALL ] )
     {
         newX--;
     }
     else if (   _event->key() == Qt::Key_Right
-            &&  !maze.getRoom( player.x, player.y ).walls[ RIGHT_WALL ] )
+            &&  !m_pMaze->getRoom( player.x, player.y ).walls[ RIGHT_WALL ] )
     {
         newX++;
     }
 
     // Update player position
-    if (    newX >= 0 && newX < maze.getSize()
-        &&  newY >= 0 && newY < maze.getSize()
+    if (    newX >= 0 && newX < m_pMaze->getSize()
+        &&  newY >= 0 && newY < m_pMaze->getSize()
     )
     {
         player.x = newX;
@@ -296,8 +316,16 @@ void GameWidget::checkVictory ()
 
 /*----------------------------------------------------------------------------*/
 
-void GameWidget::handleGenerateButton ()
+void GameWidget::handleGenerateKruskalButton ()
 {
+    m_pMaze = m_pKruskalMaze.get();
+    generateNewMaze();
+}
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::handleGenerateEllerButton ()
+{
+    m_pMaze = m_pEllerMaze.get();
     generateNewMaze();
 }
 
@@ -323,9 +351,9 @@ void GameWidget::updateTimer ()
 void GameWidget::generateNewMaze ()
 {
     {
-        maze.reset();
-        Timer< std::milli > timer( "maze.generateMaze" );
-        maze.generateMaze();
+        m_pMaze->reset();
+        Timer< std::milli > timer( m_pMaze->algoName() );
+        m_pMaze->generateMaze();
     }
 
     // Clear the scene
@@ -349,8 +377,8 @@ void GameWidget::generateNewMaze ()
     // Redraw the outer border
     QPen borderPen(Qt::black);
     borderPen.setWidth(2);
-    int mazeWidth = m_cellSize * maze.getSize();
-    int mazeHeight = m_cellSize * maze.getSize();
+    int mazeWidth = m_cellSize * m_pMaze->getSize();
+    int mazeHeight = m_cellSize * m_pMaze->getSize();
     m_pScene->addRect(0, 0, mazeWidth, mazeHeight, borderPen);
 }
 /*----------------------------------------------------------------------------*/
@@ -373,10 +401,10 @@ void GameWidget::visualizePath ()
     // If not visualized, compute or reuse path
     if ( m_solutionPath.empty() )
     {
-        pathfinding::PathFinder pathFinder( maze );
+        pathfinding::PathFinder pathFinder( *m_pMaze );
         Point start{ player.x, player.y };
         Point goal{
-                maze.getSize() - 1
+                m_pMaze->getSize() - 1
             ,   static_cast< int >(
                     m_pDestinationItem->rect().y() / m_cellSize
                 )
