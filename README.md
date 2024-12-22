@@ -1,4 +1,4 @@
-A **C++** application for generating and solving mazes using **Eller's algorithm** for maze generation and **Breadth-First Search (BFS)** or **Depth-First Search (DFS)** for pathfinding. The graphical interface is implemented using **Qt6 Widgets**.
+A **C++** application for generating and solving mazes using **Eller's** and **Kruskal's** algorithms for maze generation and **Breadth-First Search (BFS)** or **Depth-First Search (DFS)** for pathfinding. The graphical interface is implemented using **Qt6 Widgets**.
 
 ---
 
@@ -6,6 +6,7 @@ A **C++** application for generating and solving mazes using **Eller's algorithm
 
 - **Maze Generation**:
   - Implements **Eller's algorithm** to generate random mazes with configurable sizes.
+  - Implements **Kruskal's algorithm** to generate random mazes with configurable sizes.
   - Supports rotation of the maze grid.
 
 - **Pathfinding**:
@@ -105,40 +106,51 @@ The project is modular, with components organized as follows:
 ```plaintext
 MazeGame/
 ├── project/
-│   ├── common/                       # Common utilities
+│   ├── common/                         # Common utilities
 │   │   ├── include/
 │   │   │   └── common/
-│   │   │       ├── Constants.h       # Global constants
-│   │   │       ├── Point.h           # Struct for grid points
-│   │   │       └── Timer.h           # Timer utility for performance measurements
+│   │   │       ├── Constants.h         # Global constants
+│   │   │       ├── FlexibleIterator.h  # Forward/Backward indexer
+│   │   │       ├── Point.h             # Struct for grid points
+│   │   │       └── Timer.h             # Timer utility for performance measurements
 │   │   ├── src/
-│   │   │   └── FlexibleIterator.cpp  # Flexible iterator implementation
-│   │   └── CMakeLists.txt            # CMake configuration for common module
-│   ├── maze/                         # Maze generation logic
+│   │   │   └── FlexibleIterator.cpp    # Flexible iterator implementation
+│   │   └── CMakeLists.txt              # CMake configuration for common module
+│   ├── maze/                           # Maze generation logic
 │   │   ├── include/
 │   │   │   └── maze/
-│   │   │       └── Maze.h            # Maze class declaration
+│   │   │       └── IMaze.h             # IMaze class interface
+│   │   │       └── IMazeFactory.h      # IMazeFactor class
 │   │   ├── src/
-│   │   │   └── Maze.cpp              # Maze generation logic (Eller's algorithm)
-│   │   └── CMakeLists.txt            # CMake configuration for maze module
-│   ├── pathfinding/                  # Pathfinding algorithms
+│   │   │   ├── BaseMaze.h              # Basic IMaze interface implementation (still abstract)
+│   │   │   ├── BaseMaze.cpp            # Sources
+│   │   │   ├── EllerMaze.h             # Eller's maze generation full implementation
+│   │   │   ├── EllerMaze.cpp           # Sources
+│   │   │   ├── KruskalMaze.h           # Kruskal's maze generation full implementation
+│   │   │   ├── KruskalMaze.cpp         # Sources
+│   │   │   ├── MazeFactory.h           # IMazeFactory interface implementation
+│   │   │   └── MazeFactory.cpp         # Sources + createFactory static method implementation
+│   │   └── CMakeLists.txt              # CMake configuration for maze module
+│   ├── pathfinding/                    # Pathfinding algorithms
 │   │   ├── include/
 │   │   │   └── pathfinding/
-│   │   │       └── PathFinder.h      # Pathfinding algorithms (BFS/DFS)
+│   │   │       └── PathFinder.h        # Pathfinding algorithms (BFS/DFS)
 │   │   ├── src/
-│   │   │   └── PathFinder.cpp        # Implementation of BFS/DFS
-│   │   └── CMakeLists.txt            # CMake configuration for pathfinding module
-│   ├── gui/                          # Graphical interface for the game
+│   │   │   ├── Frontier.h              # Internal structure for search algorithms
+│   │   │   ├── Frontier.cpp            # Implementation of internal structure for search algorithms
+│   │   │   └── PathFinder.cpp          # Implementation of BFS/DFS
+│   │   └── CMakeLists.txt              # CMake configuration for pathfinding module
+│   ├── gui/                            # Graphical interface for the game
 │   │   ├── include/
 │   │   │   └── gui/
-│   │   │       └── GameWidget.h      # GUI class for maze interaction
+│   │   │       └── GameWidget.h        # GUI class for maze interaction
 │   │   ├── src/
-│   │   │   └── GameWidget.cpp        # Implementation of the GUI
-│   │   └── CMakeLists.txt            # CMake configuration for gui module
-│   ├── main.cpp                      # Main entry point
-│   └── CMakeLists.txt                # CMake configuration for project root
-├── CMakeLists.txt                    # Root CMake configuration
-└── README.md                         # Project documentation
+│   │   │   └── GameWidget.cpp          # Implementation of the GUI
+│   │   └── CMakeLists.txt              # CMake configuration for gui module
+│   ├── main.cpp                        # Main entry point
+│   └── CMakeLists.txt                  # CMake configuration for project root
+├── CMakeLists.txt                      # Root CMake configuration
+└── README.md                           # Project documentation
 ```
 
 ---
@@ -165,7 +177,7 @@ Maze::Maze ( int _size )
 The `PathFinder` class implements **BFS** and **DFS** algorithms to solve the maze. BFS is used by default.
 
 ```cpp
-PathFinder::Path PathFinder::solve ( Point _start, Point _goal, bool _useBFS )
+PathFinder::Path PathFinder::solve ( Point const & _start, Point const & _goal, bool _useBFS )
 {
     std::unique_ptr<Frontier> frontier = _useBFS
         ? std::make_unique<QueueFrontier>()
