@@ -38,7 +38,8 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
 
     m_pGenerateKruskalButton = std::make_unique< QPushButton >( "Generate (Kruskal)", this );
     m_pGenerateEllerButton = std::make_unique< QPushButton >( "Generate (Eller)", this );
-    m_pFindPathButton = std::make_unique< QPushButton >( "Find Path", this );
+    m_pFindPathBfsButton = std::make_unique< QPushButton >( "Find Path (BFS)", this );
+    m_pFindPathDfsButton = std::make_unique< QPushButton >( "Find Path (DFS)", this );
 
     connect(
             m_pGenerateKruskalButton.get()
@@ -53,10 +54,16 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
         ,   &GameWidget::handleGenerateEllerButton
     );
     connect(
-            m_pFindPathButton.get()
+            m_pFindPathBfsButton.get()
         ,   &QPushButton::clicked
         ,   this
-        ,   &GameWidget::handleFindPathButton
+        ,   &GameWidget::handleFindPathBfsButton
+    );
+    connect(
+            m_pFindPathDfsButton.get()
+        ,   &QPushButton::clicked
+        ,   this
+        ,   &GameWidget::handleFindPathDfsButton
     );
 
     m_pMainLayout = std::make_unique< QVBoxLayout >(this);
@@ -64,7 +71,8 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     QHBoxLayout * pButtonLayout = new QHBoxLayout();
     pButtonLayout->addWidget( m_pGenerateKruskalButton.get() );
     pButtonLayout->addWidget( m_pGenerateEllerButton.get() );
-    pButtonLayout->addWidget( m_pFindPathButton.get() );
+    pButtonLayout->addWidget( m_pFindPathBfsButton.get() );
+    pButtonLayout->addWidget( m_pFindPathDfsButton.get() );
     pButtonLayout->addStretch();
 
     m_pMainLayout->addLayout( pButtonLayout );
@@ -234,9 +242,15 @@ void GameWidget::placePlayerAndDestination ()
 
 void GameWidget::keyPressEvent ( QKeyEvent * _event )
 {
-    if ( _event->key() == Qt::Key_P )
+    if ( _event->key() == Qt::Key_B )
     {
-        visualizePath();
+        handleFindPathBfsButton();
+        return;
+    }
+
+    if ( _event->key() == Qt::Key_D )
+    {
+        handleFindPathDfsButton();
         return;
     }
 
@@ -331,9 +345,16 @@ void GameWidget::handleGenerateEllerButton ()
 
 /*----------------------------------------------------------------------------*/
 
-void GameWidget::handleFindPathButton ()
+void GameWidget::handleFindPathBfsButton ()
 {
-    visualizePath();
+    visualizePath( true );
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::handleFindPathDfsButton ()
+{
+    visualizePath( false );
 }
 
 /*----------------------------------------------------------------------------*/
@@ -383,7 +404,7 @@ void GameWidget::generateNewMaze ()
 }
 /*----------------------------------------------------------------------------*/
 
-void GameWidget::visualizePath ()
+void GameWidget::visualizePath ( bool _useBfs )
 {
     if ( m_isPathVisualized )
     {
@@ -412,8 +433,10 @@ void GameWidget::visualizePath ()
 
         try
         {
-            Timer< std::milli > timer( "pathFinder.solve" );
-            m_solutionPath = pathFinder.solve( start, goal, true ); // BFS by default
+            std::string timerTitle = "Path finding - ";
+            timerTitle += ( _useBfs ) ? "BFS" : "DFS";
+            Timer< std::milli > timer( timerTitle );
+            m_solutionPath = pathFinder.solve( start, goal, _useBfs );
         }
         catch (const std::exception &e)
         {

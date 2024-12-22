@@ -52,13 +52,14 @@ private:
 
     void generateNewMaze ();
 
-    void visualizePath ();
+    void visualizePath ( bool _useBfs );
 
 private slots:
 
     void handleGenerateKruskalButton ();
     void handleGenerateEllerButton ();
-    void handleFindPathButton ();
+    void handleFindPathBfsButton ();
+    void handleFindPathDfsButton ();
     void updateTimer ();
 
 private:
@@ -88,7 +89,8 @@ private:
     // UI Elements for Buttons
     std::unique_ptr< QPushButton > m_pGenerateKruskalButton;
     std::unique_ptr< QPushButton > m_pGenerateEllerButton;
-    std::unique_ptr< QPushButton > m_pFindPathButton;
+    std::unique_ptr< QPushButton > m_pFindPathBfsButton;
+    std::unique_ptr< QPushButton > m_pFindPathDfsButton;
     std::unique_ptr< QVBoxLayout > m_pMainLayout;
 };
 
