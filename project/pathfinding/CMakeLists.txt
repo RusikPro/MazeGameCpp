@@ -1,6 +1,10 @@
 # Add the PathFinding module
 add_library(pathfinding STATIC
     include/pathfinding/PathFinder.h
+
+    src/Frontier.h
+    src/Frontier.cpp
+
     src/PathFinder.cpp
 )
 

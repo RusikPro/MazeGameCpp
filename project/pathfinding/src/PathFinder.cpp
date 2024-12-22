@@ -1,46 +1,14 @@
 #include "pathfinding/PathFinder.h"
+#include "Frontier.h"
+
 #include "maze/IMaze.h"
 #include "common/Constants.h"
-#include <algorithm>
-#include <iostream>
+
+#include <unordered_set>
 
 /*----------------------------------------------------------------------------*/
 
 namespace pathfinding {
-
-/*----------------------------------------------------------------------------*/
-
-bool BaseFrontier::contains ( Point const & _state ) const
-{
-    for ( auto node : frontier )
-    {
-        if ( node->state == _state )
-            return true;
-    }
-    return false;
-}
-
-/*----------------------------------------------------------------------------*/
-
-NodePtr StackFrontier::remove ()
-{
-    if ( empty() )
-        throw std::runtime_error( "Frontier is empty!" );
-    NodePtr node = frontier.back();
-    frontier.pop_back();
-    return node;
-}
-
-/*----------------------------------------------------------------------------*/
-
-NodePtr QueueFrontier::remove ()
-{
-    if ( empty() )
-        throw std::runtime_error( "Frontier is empty!" );
-    auto node = frontier.front();
-    frontier.erase( frontier.begin() );
-    return node;
-}
 
 /*----------------------------------------------------------------------------*/
 
@@ -52,7 +20,7 @@ PathFinder::PathFinder ( maze::IMaze const & _maze )
 
 /*----------------------------------------------------------------------------*/
 
-std::vector<  Point > PathFinder::neighbors ( Point _state )
+std::vector<  Point > PathFinder::neighbors ( Point const & _state )
 {
     std::vector< Point > result;
     auto const & room = m_maze.getRoom( _state.x, _state.y );
@@ -74,7 +42,9 @@ std::vector<  Point > PathFinder::neighbors ( Point _state )
 
 /*----------------------------------------------------------------------------*/
 
-PathFinder::Path PathFinder::solve ( Point _start, Point _goal, bool _useBFS )
+PathFinder::Path PathFinder::solve (
+    Point const & _start, Point const & _goal, bool _useBFS
+)
 {
     std::unique_ptr< Frontier > frontier;
 
