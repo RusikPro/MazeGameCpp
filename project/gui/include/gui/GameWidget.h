@@ -56,6 +56,7 @@ private:
 
     void resetAll ();
     void resetPath ();
+    void resetTimer ();
     void clearPlayerAndDestination ();
 
 private slots:
@@ -85,7 +86,7 @@ private:
     Player player;
 
     std::unique_ptr< QTimer > m_pTimer;
-    int elapsedTime;
+    int m_elapsedTime;
     int m_cellSize;
 
     // Visualization mmembers

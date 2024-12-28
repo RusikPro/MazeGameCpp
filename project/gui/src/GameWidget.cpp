@@ -30,7 +30,7 @@ namespace gui {
 GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     :   QWidget( parent )
     ,   m_pMaze( nullptr )
-    ,   elapsedTime( 0 )
+    ,   m_elapsedTime( 0 )
 {
     auto mazeFactory = maze::IMazeFactory::createFactory();
     m_pKruskalMaze = mazeFactory->createMaze( maze::MazeAlgo::Kruskal, _mazeSize );
@@ -348,7 +348,7 @@ void GameWidget::checkVictory ()
             ,   "Victory!"
             ,   QString(
                     "Congratulations! You reached the goal in %1 seconds!"
-                ).arg( elapsedTime )
+                ).arg( m_elapsedTime )
         );
         QApplication::quit();
     }
@@ -448,9 +448,9 @@ void GameWidget::handleReshuffleButton ()
 
 void GameWidget::updateTimer ()
 {
-    elapsedTime++;
+    m_elapsedTime++;
     setWindowTitle(
-        QString( "Maze Game - Time: %1 seconds" ).arg( elapsedTime )
+        QString( "Maze Game - Time: %1 seconds" ).arg( m_elapsedTime )
     );
 }
 
@@ -546,6 +546,8 @@ void GameWidget::resetAll ()
     clearPlayerAndDestination();
     m_solutionPath.clear();
     m_pScene->clear();
+
+    resetTimer();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -567,6 +569,13 @@ void GameWidget::resetPath ()
     m_pathLines.clear();
 
     m_isPathVisualized = false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::resetTimer ()
+{
+    m_elapsedTime = -1;
 }
 
 /*----------------------------------------------------------------------------*/
