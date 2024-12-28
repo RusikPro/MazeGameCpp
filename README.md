@@ -231,8 +231,7 @@ Clicking the "Generate" (either Kruskal or Eller) button (or K (Kruskal) or E (E
 
 Pressing the "Find Path" (either BFS or DFS) button (or B (BFS) or D (DFS) on the keyboard) finds a path from your current position.
 
-<img width="1060" alt="image" src="https://github.com/user-attachments/assets/1f558519-c072-4148-9aa0-fb75f0d54825" />
-
+<img width="1160" alt="image" src="https://github.com/user-attachments/assets/15a3d574-22cb-4c11-9717-31cc1853d843" />
 
 ### 4. **Benchmarks in console**
 
