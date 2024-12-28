@@ -22,6 +22,8 @@ public:
     const Room& getRoom ( int x, int y ) const override;
 
     void reset () override;
+    void save ( std::string const & _filename ) const override;
+    void load ( std::string const & _filename ) override;
 
 private:
 

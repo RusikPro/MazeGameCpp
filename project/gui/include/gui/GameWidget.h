@@ -54,12 +54,19 @@ private:
 
     void visualizePath ( bool _useBfs );
 
+    void resetAll ();
+    void resetPath ();
+    void clearPlayerAndDestination ();
+
 private slots:
 
     void handleGenerateKruskalButton ();
     void handleGenerateEllerButton ();
     void handleFindPathBfsButton ();
     void handleFindPathDfsButton ();
+    void handleSaveButton ();
+    void handleLoadButton ();
+    void handleReshuffleButton ();
     void updateTimer ();
 
 private:
@@ -91,6 +98,9 @@ private:
     std::unique_ptr< QPushButton > m_pGenerateEllerButton;
     std::unique_ptr< QPushButton > m_pFindPathBfsButton;
     std::unique_ptr< QPushButton > m_pFindPathDfsButton;
+    std::unique_ptr< QPushButton > m_pSaveButton;
+    std::unique_ptr< QPushButton > m_pLoadButton;
+    std::unique_ptr<QPushButton> m_pReshuffleButton;
     std::unique_ptr< QVBoxLayout > m_pMainLayout;
 };
 

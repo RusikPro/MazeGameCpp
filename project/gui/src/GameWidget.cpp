@@ -7,6 +7,7 @@
 
 #include <QApplication>
 #include <QBrush>
+#include <QFileDialog>
 #include <QGraphicsRectItem>
 #include <QGuiApplication>
 #include <QMessageBox>
@@ -18,6 +19,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <thread>
 
 /*----------------------------------------------------------------------------*/
 
@@ -40,6 +42,9 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     m_pGenerateEllerButton = std::make_unique< QPushButton >( "Generate (Eller)", this );
     m_pFindPathBfsButton = std::make_unique< QPushButton >( "Find Path (BFS)", this );
     m_pFindPathDfsButton = std::make_unique< QPushButton >( "Find Path (DFS)", this );
+    m_pSaveButton = std::make_unique< QPushButton >( "Save", this );
+    m_pLoadButton = std::make_unique< QPushButton >( "Load", this );
+    m_pReshuffleButton = std::make_unique< QPushButton >( "Reshuffle", this );
 
     connect(
             m_pGenerateKruskalButton.get()
@@ -65,6 +70,24 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
         ,   this
         ,   &GameWidget::handleFindPathDfsButton
     );
+    connect(
+            m_pSaveButton.get()
+        ,   &QPushButton::clicked
+        ,   this
+        ,   &GameWidget::handleSaveButton
+    );
+    connect(
+            m_pLoadButton.get()
+        ,   &QPushButton::clicked
+        ,   this
+        ,   &GameWidget::handleLoadButton
+    );
+    connect(
+            m_pReshuffleButton.get()
+        ,   &QPushButton::clicked
+        ,   this
+        ,   &GameWidget::handleReshuffleButton
+    );
 
     m_pMainLayout = std::make_unique< QVBoxLayout >(this);
 
@@ -73,6 +96,9 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     pButtonLayout->addWidget( m_pGenerateEllerButton.get() );
     pButtonLayout->addWidget( m_pFindPathBfsButton.get() );
     pButtonLayout->addWidget( m_pFindPathDfsButton.get() );
+    pButtonLayout->addWidget( m_pSaveButton.get() );
+    pButtonLayout->addWidget( m_pLoadButton.get() );
+    pButtonLayout->addWidget( m_pReshuffleButton.get() );
     pButtonLayout->addStretch();
 
     m_pMainLayout->addLayout( pButtonLayout );
@@ -359,6 +385,67 @@ void GameWidget::handleFindPathDfsButton ()
 
 /*----------------------------------------------------------------------------*/
 
+void GameWidget::handleSaveButton()
+{
+    QString filename = QFileDialog::getSaveFileName(
+        this, "Save Maze", "", "Maze Files (*.maze)"
+    );
+    if ( !filename.isEmpty() )
+    {
+        std::thread saveThread( [ this, filename ] ()
+        {
+            try
+            {
+                m_pMaze->save( filename.toStdString() );
+            }
+            catch ( std::exception const& _e )
+            {
+                QMessageBox::critical( this, "Error", _e.what() );
+            }
+        } );
+        saveThread.detach();
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::handleLoadButton()
+{
+    QString filename = QFileDialog::getOpenFileName(
+        this, "Load Maze", "", "Maze Files (*.maze)"
+    );
+    if ( !filename.isEmpty() )
+    {
+        try
+        {
+            m_pMaze->load( filename.toStdString() );
+
+            resetAll();
+
+            drawMaze();
+
+            placePlayerAndDestination();
+        }
+        catch ( std::exception const& _e )
+        {
+            QMessageBox::critical( this, "Error", _e.what() );
+        }
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::handleReshuffleButton ()
+{
+    m_solutionPath.clear();
+    resetPath();
+
+    clearPlayerAndDestination();
+    placePlayerAndDestination();
+}
+
+/*----------------------------------------------------------------------------*/
+
 void GameWidget::updateTimer ()
 {
     elapsedTime++;
@@ -377,17 +464,7 @@ void GameWidget::generateNewMaze ()
         m_pMaze->generateMaze();
     }
 
-    // Clear the scene
-    m_pScene->clear();
-
-    // Clear stored solution path
-    m_solutionPath.clear();
-
-    // Properly clean up path lines
-    m_pathLines.clear();
-
-    // Reset visualization flag
-    m_isPathVisualized = false;
+    resetAll();
 
     // Reset player and destination positions
     placePlayerAndDestination();
@@ -408,14 +485,7 @@ void GameWidget::visualizePath ( bool _useBfs )
 {
     if ( m_isPathVisualized )
     {
-        // Remove path visualization
-        for ( auto * pLine : m_pathLines )
-        {
-            m_pScene->removeItem( pLine );
-            delete pLine;
-        }
-        m_pathLines.clear();
-        m_isPathVisualized = false;
+        resetPath();
         return;
     }
 
@@ -466,6 +536,56 @@ void GameWidget::visualizePath ( bool _useBfs )
     }
 
     m_isPathVisualized = true; // Path is now visualized
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::resetAll ()
+{
+    resetPath();
+    clearPlayerAndDestination();
+    m_solutionPath.clear();
+    m_pScene->clear();
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::resetPath ()
+{
+    if ( !m_isPathVisualized )
+    {
+        return;
+    }
+
+    // Remove path visualization
+    for ( auto * pLine : m_pathLines )
+    {
+        m_pScene->removeItem( pLine );
+        delete pLine;
+    }
+
+    m_pathLines.clear();
+
+    m_isPathVisualized = false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GameWidget::clearPlayerAndDestination ()
+{
+    if ( m_pPlayerItem )
+    {
+        m_pScene->removeItem( m_pPlayerItem );
+        delete m_pPlayerItem;
+        m_pPlayerItem = nullptr;
+    }
+
+    if ( m_pDestinationItem )
+    {
+        m_pScene->removeItem( m_pDestinationItem );
+        delete m_pDestinationItem;
+        m_pDestinationItem = nullptr;
+    }
 }
 
 /*----------------------------------------------------------------------------*/

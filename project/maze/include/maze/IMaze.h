@@ -34,6 +34,9 @@ public:
     virtual void generateMaze () = 0;
 
     virtual std::string algoName () const = 0;
+
+    virtual void save ( std::string const & _filename ) const = 0;
+    virtual void load ( std::string const & _filename ) = 0;
 };
 
 /*----------------------------------------------------------------------------*/

@@ -2,6 +2,7 @@
 
 #include "common/Constants.h"
 
+#include <fstream>
 #include <sstream>
 
 /*----------------------------------------------------------------------------*/
@@ -56,6 +57,52 @@ const Room& BaseMaze::getRoom ( int x, int y ) const
 void BaseMaze::reset ()
 {
     m_grid = Grid( m_size, Rooms( m_size ) );
+}
+
+/*----------------------------------------------------------------------------*/
+
+void BaseMaze::save ( std::string const & _filename ) const
+{
+    std::ofstream file( _filename, std::ios::binary );
+    if ( !file )
+    {
+        throw std::runtime_error( "Failed to open file for saving" );
+    }
+
+    file.write( reinterpret_cast< const char * >( &m_size ), sizeof( m_size ) );
+    for ( const auto & row : m_grid )
+    {
+        for ( const auto & room : row )
+        {
+            file.write(
+                    reinterpret_cast< const char * >( room.walls )
+                ,   sizeof( room.walls )
+            );
+        }
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void BaseMaze::load ( std::string const & _filename )
+{
+    std::ifstream file( _filename, std::ios::binary );
+    if ( !file )
+    {
+        throw std::runtime_error( "Failed to open file for loading" );
+    }
+
+    file.read( reinterpret_cast< char * >( &m_size ), sizeof( m_size ) );
+    m_grid = Grid( m_size, Rooms( m_size ) );
+    for ( auto & row : m_grid )
+    {
+        for ( auto & room : row )
+        {
+            file.read(
+                reinterpret_cast< char * >( room.walls ), sizeof( room.walls )
+            );
+        }
+    }
 }
 
 /*----------------------------------------------------------------------------*/
