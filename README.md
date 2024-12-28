@@ -207,27 +207,39 @@ GameWidget::GameWidget(int _mazeSize, QWidget *parent)
 
 ### 1. **Generated Maze**
 
-For 50 rooms:
-<img width="863" alt="image" src="https://github.com/user-attachments/assets/5ec38825-5448-40cb-938a-bd776bc68a39" />
+#### For 50 rooms
+```bash
+./MazeGame 50
+```
+<img width="844" alt="image" src="https://github.com/user-attachments/assets/bb514bd7-3c33-43a9-b704-dd2dc16b866a" />
 
-For 100 rooms:
-<img width="1061" alt="image" src="https://github.com/user-attachments/assets/4ed11f05-c599-4ad8-bc65-fd38c573b0aa" />
+
+#### For 100 rooms
+```bash
+./MazeGame 100
+```
+<img width="1167" alt="image" src="https://github.com/user-attachments/assets/9a1b3b4c-4a64-47f6-b448-68ce0dc1aa76" />
 
 
-### 2. **Path Visualization**
+### 2. **New Maze Generation**
 
-Pressing the "Find Path" button (or P on the keyboard) finds a path from your current position, using BFS.
+Clicking the "Generate" (either Kruskal or Eller) button (or K (Kruskal) or E (Eller) on the keyboard) creates a new maze.
+<img width="1158" alt="image" src="https://github.com/user-attachments/assets/7bf252fe-6c4b-4a14-b537-1de3d410235e" />
+
+
+### 3. **Path Visualization**
+
+Pressing the "Find Path" (either BFS or DFS) button (or B (BFS) or D (DFS) on the keyboard) finds a path from your current position.
+
 <img width="1060" alt="image" src="https://github.com/user-attachments/assets/1f558519-c072-4148-9aa0-fb75f0d54825" />
 
 
-### 3. **New Maze Generation**
-
-Pressing the "Generate" button (or G on the keyboard) creates a new maze.
-<img width="862" alt="image" src="https://github.com/user-attachments/assets/9efb040f-734a-42d2-855f-8b52ee5c9caf" />
-
 ### 4. **Benchmarks in console**
 
-<img width="518" alt="image" src="https://github.com/user-attachments/assets/32111271-e664-4569-a4c1-dda8b6c2e4f5" />
+Benchmarks are logged in the console and show the performance of different generation and path finding algorithms applied.
+
+<img width="351" alt="image" src="https://github.com/user-attachments/assets/13c62723-813d-4021-a98c-2081fa1a4eef" />
+
 
 ---
 
