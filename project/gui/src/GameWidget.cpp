@@ -47,46 +47,32 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     m_pReshuffleButton = std::make_unique< QPushButton >( "Reshuffle", this );
 
     connect(
-            m_pGenerateKruskalButton.get()
-        ,   &QPushButton::clicked
-        ,   this
-        ,   &GameWidget::handleGenerateKruskalButton
+            m_pGenerateKruskalButton.get(), &QPushButton::clicked,
+            this, &GameWidget::handleGenerateKruskalButton
     );
     connect(
-            m_pGenerateEllerButton.get()
-        ,   &QPushButton::clicked
-        ,   this
-        ,   &GameWidget::handleGenerateEllerButton
+            m_pGenerateEllerButton.get(), &QPushButton::clicked,
+            this, &GameWidget::handleGenerateEllerButton
     );
     connect(
-            m_pFindPathBfsButton.get()
-        ,   &QPushButton::clicked
-        ,   this
-        ,   &GameWidget::handleFindPathBfsButton
+            m_pFindPathBfsButton.get(), &QPushButton::clicked,
+            this, &GameWidget::handleFindPathBfsButton
     );
     connect(
-            m_pFindPathDfsButton.get()
-        ,   &QPushButton::clicked
-        ,   this
-        ,   &GameWidget::handleFindPathDfsButton
+            m_pFindPathDfsButton.get(), &QPushButton::clicked,
+            this, &GameWidget::handleFindPathDfsButton
     );
     connect(
-            m_pSaveButton.get()
-        ,   &QPushButton::clicked
-        ,   this
-        ,   &GameWidget::handleSaveButton
+            m_pSaveButton.get(), &QPushButton::clicked,
+            this, &GameWidget::handleSaveButton
     );
     connect(
-            m_pLoadButton.get()
-        ,   &QPushButton::clicked
-        ,   this
-        ,   &GameWidget::handleLoadButton
+            m_pLoadButton.get(), &QPushButton::clicked,
+            this, &GameWidget::handleLoadButton
     );
     connect(
-            m_pReshuffleButton.get()
-        ,   &QPushButton::clicked
-        ,   this
-        ,   &GameWidget::handleReshuffleButton
+            m_pReshuffleButton.get(), &QPushButton::clicked,
+            this, &GameWidget::handleReshuffleButton
     );
 
     m_pMainLayout = std::make_unique< QVBoxLayout >(this);
@@ -288,30 +274,28 @@ void GameWidget::keyPressEvent ( QKeyEvent * _event )
     else if ( _event->key() == Qt::Key_E )
     {
         handleGenerateEllerButton();
+        return;
     }
 
     int newX = player.x;
     int newY = player.y;
 
     // Determine new position based on key press
-    if (    _event->key() == Qt::Key_Up
-        &&  !m_pMaze->getRoom( player.x, player.y ).walls[ TOP_WALL ]
-    )
+    auto const & room = m_pMaze->getRoom( player.x, player.y );
+
+    if (    _event->key() == Qt::Key_Up && !room.walls[ TOP_WALL ] )
     {
         newY--;
     }
-    else if (   _event->key() == Qt::Key_Down
-            &&  !m_pMaze->getRoom( player.x, player.y ).walls[ BOTTOM_WALL ] )
+    else if (   _event->key() == Qt::Key_Down && !room.walls[ BOTTOM_WALL ] )
     {
         newY++;
     }
-    else if (   _event->key() == Qt::Key_Left
-            &&  !m_pMaze->getRoom( player.x, player.y ).walls[ LEFT_WALL ] )
+    else if (   _event->key() == Qt::Key_Left && !room.walls[ LEFT_WALL ] )
     {
         newX--;
     }
-    else if (   _event->key() == Qt::Key_Right
-            &&  !m_pMaze->getRoom( player.x, player.y ).walls[ RIGHT_WALL ] )
+    else if (   _event->key() == Qt::Key_Right && !room.walls[ RIGHT_WALL ] )
     {
         newX++;
     }
