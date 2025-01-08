@@ -38,53 +38,53 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
 
     m_pMaze = m_pKruskalMaze.get();
 
-    m_pGenerateKruskalButton = std::make_unique< QPushButton >( "Generate (Kruskal)", this );
-    m_pGenerateEllerButton = std::make_unique< QPushButton >( "Generate (Eller)", this );
-    m_pFindPathBfsButton = std::make_unique< QPushButton >( "Find Path (BFS)", this );
-    m_pFindPathDfsButton = std::make_unique< QPushButton >( "Find Path (DFS)", this );
-    m_pSaveButton = std::make_unique< QPushButton >( "Save", this );
-    m_pLoadButton = std::make_unique< QPushButton >( "Load", this );
-    m_pReshuffleButton = std::make_unique< QPushButton >( "Reshuffle", this );
+    m_pGenerateKruskalButton = new QPushButton( "Generate (Kruskal)", this );
+    m_pGenerateEllerButton = new QPushButton( "Generate (Eller)", this );
+    m_pFindPathBfsButton = new QPushButton( "Find Path (BFS)", this );
+    m_pFindPathDfsButton = new QPushButton( "Find Path (DFS)", this );
+    m_pSaveButton = new QPushButton( "Save", this );
+    m_pLoadButton = new QPushButton( "Load", this );
+    m_pReshuffleButton = new QPushButton( "Reshuffle", this );
 
     connect(
-            m_pGenerateKruskalButton.get(), &QPushButton::clicked,
+            m_pGenerateKruskalButton, &QPushButton::clicked,
             this, &GameWidget::handleGenerateKruskalButton
     );
     connect(
-            m_pGenerateEllerButton.get(), &QPushButton::clicked,
+            m_pGenerateEllerButton, &QPushButton::clicked,
             this, &GameWidget::handleGenerateEllerButton
     );
     connect(
-            m_pFindPathBfsButton.get(), &QPushButton::clicked,
+            m_pFindPathBfsButton, &QPushButton::clicked,
             this, &GameWidget::handleFindPathBfsButton
     );
     connect(
-            m_pFindPathDfsButton.get(), &QPushButton::clicked,
+            m_pFindPathDfsButton, &QPushButton::clicked,
             this, &GameWidget::handleFindPathDfsButton
     );
     connect(
-            m_pSaveButton.get(), &QPushButton::clicked,
+            m_pSaveButton, &QPushButton::clicked,
             this, &GameWidget::handleSaveButton
     );
     connect(
-            m_pLoadButton.get(), &QPushButton::clicked,
+            m_pLoadButton, &QPushButton::clicked,
             this, &GameWidget::handleLoadButton
     );
     connect(
-            m_pReshuffleButton.get(), &QPushButton::clicked,
+            m_pReshuffleButton, &QPushButton::clicked,
             this, &GameWidget::handleReshuffleButton
     );
 
     m_pMainLayout = std::make_unique< QVBoxLayout >(this);
 
     QHBoxLayout * pButtonLayout = new QHBoxLayout();
-    pButtonLayout->addWidget( m_pGenerateKruskalButton.get() );
-    pButtonLayout->addWidget( m_pGenerateEllerButton.get() );
-    pButtonLayout->addWidget( m_pFindPathBfsButton.get() );
-    pButtonLayout->addWidget( m_pFindPathDfsButton.get() );
-    pButtonLayout->addWidget( m_pSaveButton.get() );
-    pButtonLayout->addWidget( m_pLoadButton.get() );
-    pButtonLayout->addWidget( m_pReshuffleButton.get() );
+    pButtonLayout->addWidget( m_pGenerateKruskalButton );
+    pButtonLayout->addWidget( m_pGenerateEllerButton );
+    pButtonLayout->addWidget( m_pFindPathBfsButton );
+    pButtonLayout->addWidget( m_pFindPathDfsButton );
+    pButtonLayout->addWidget( m_pSaveButton );
+    pButtonLayout->addWidget( m_pLoadButton );
+    pButtonLayout->addWidget( m_pReshuffleButton );
     pButtonLayout->addStretch();
 
     m_pMainLayout->addLayout( pButtonLayout );

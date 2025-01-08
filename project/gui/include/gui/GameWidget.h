@@ -95,13 +95,13 @@ private:
     bool m_isPathVisualized = false;
 
     // UI Elements for Buttons
-    std::unique_ptr< QPushButton > m_pGenerateKruskalButton;
-    std::unique_ptr< QPushButton > m_pGenerateEllerButton;
-    std::unique_ptr< QPushButton > m_pFindPathBfsButton;
-    std::unique_ptr< QPushButton > m_pFindPathDfsButton;
-    std::unique_ptr< QPushButton > m_pSaveButton;
-    std::unique_ptr< QPushButton > m_pLoadButton;
-    std::unique_ptr<QPushButton> m_pReshuffleButton;
+    QPushButton * m_pGenerateKruskalButton;
+    QPushButton * m_pGenerateEllerButton;
+    QPushButton * m_pFindPathBfsButton;
+    QPushButton * m_pFindPathDfsButton;
+    QPushButton * m_pSaveButton;
+    QPushButton * m_pLoadButton;
+    QPushButton * m_pReshuffleButton;
     std::unique_ptr< QVBoxLayout > m_pMainLayout;
 };
 
