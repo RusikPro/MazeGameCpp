@@ -46,7 +46,7 @@ public:
     bool contains ( Point const & _state ) const override;
 
 protected:
-    std::vector< NodePtr > frontier;
+    std::vector< NodePtr > m_frontier;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -55,9 +55,9 @@ class StackFrontier : public BaseFrontier
 {
 
 public:
-    void add ( NodePtr node ) override { frontier.push_back( node ); }
+    void add ( NodePtr _node ) override { m_frontier.push_back( _node ); }
     NodePtr remove () override;
-    bool empty () const override { return frontier.empty(); }
+    bool empty () const override { return m_frontier.empty(); }
 };
 
 /*----------------------------------------------------------------------------*/
@@ -65,12 +65,12 @@ public:
 class QueueFrontier : public BaseFrontier
 {
 private:
-    std::vector< NodePtr > frontier;
+    std::vector< NodePtr > m_frontier;
 
 public:
-    void add ( NodePtr node ) override { frontier.push_back( node ); }
+    void add ( NodePtr _node ) override { m_frontier.push_back( _node ); }
     NodePtr remove () override;
-    bool empty () const override { return frontier.empty(); }
+    bool empty () const override { return m_frontier.empty(); }
 };
 
 /*----------------------------------------------------------------------------*/
