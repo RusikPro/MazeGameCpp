@@ -26,6 +26,8 @@ public:
     virtual ~IMaze () = default;
 
     virtual Grid const & getGrid () const = 0;
+    virtual Grid & takeGrid () = 0;
+
     virtual int getSize () const = 0;
     virtual const Room& getRoom ( int x, int y ) const = 0;
 
@@ -34,9 +36,6 @@ public:
     virtual void generateMaze () = 0;
 
     virtual std::string algoName () const = 0;
-
-    virtual void save ( std::string const & _filename ) const = 0;
-    virtual void load ( std::string const & _filename ) = 0;
 };
 
 /*----------------------------------------------------------------------------*/

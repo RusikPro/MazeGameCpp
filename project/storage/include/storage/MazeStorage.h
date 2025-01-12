@@ -1,44 +1,31 @@
-#ifndef BASEMAZE_H
-#define BASEMAZE_H
+#ifndef MAZESTORAGE_H
+#define MAZESTORAGE_H
 
 /*----------------------------------------------------------------------------*/
 
 #include "maze/IMaze.h"
+#include <string>
 
 /*----------------------------------------------------------------------------*/
 
-namespace maze {
+namespace storage {
 
 /*----------------------------------------------------------------------------*/
 
-class BaseMaze : public IMaze
+class MazeStorage
 {
 public:
+    static void
+    save ( maze::IMaze const & _maze, std::string const & _filename );
 
-    BaseMaze ( int _size );
-
-    Grid const & getGrid () const override;
-    Grid & takeGrid () override;
-
-    int getSize () const override;
-    const Room& getRoom ( int x, int y ) const override;
-
-    void reset () override;
-
-private:
-
-    void validateSize () const;
-
-protected:
-
-    int m_size;
-    Grid m_grid;
+    static void
+    load ( maze::IMaze & _maze, std::string const & _filename );
 };
 
 /*----------------------------------------------------------------------------*/
 
-} // namespace maze
+} // namespace storage
 
 /*----------------------------------------------------------------------------*/
 
-#endif // BASEMAZE_H
+#endif // MAZESTORAGE_H

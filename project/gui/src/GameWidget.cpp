@@ -1,6 +1,7 @@
 #include "gui/GameWidget.h"
-#include "maze/IMazeFactory.h"
 
+#include "maze/IMazeFactory.h"
+#include "storage/MazeStorage.h"
 #include "pathfinding/PathFinder.h"
 #include "common/Constants.h"
 #include "common/Timer.h"
@@ -369,7 +370,7 @@ void GameWidget::handleFindPathDfsButton ()
 
 /*----------------------------------------------------------------------------*/
 
-void GameWidget::handleSaveButton()
+void GameWidget::handleSaveButton ()
 {
     QString filename = QFileDialog::getSaveFileName(
         this, "Save Maze", "", "Maze Files (*.maze)"
@@ -380,7 +381,8 @@ void GameWidget::handleSaveButton()
         {
             try
             {
-                m_pMaze->save( filename.toStdString() );
+                storage::MazeStorage::save( *m_pMaze, filename.toStdString() );
+
             }
             catch ( std::exception const& _e )
             {
@@ -393,7 +395,7 @@ void GameWidget::handleSaveButton()
 
 /*----------------------------------------------------------------------------*/
 
-void GameWidget::handleLoadButton()
+void GameWidget::handleLoadButton ()
 {
     QString filename = QFileDialog::getOpenFileName(
         this, "Load Maze", "", "Maze Files (*.maze)"
@@ -402,7 +404,7 @@ void GameWidget::handleLoadButton()
     {
         try
         {
-            m_pMaze->load( filename.toStdString() );
+            storage::MazeStorage::load( *m_pMaze, filename.toStdString() );
 
             resetAll();
 
