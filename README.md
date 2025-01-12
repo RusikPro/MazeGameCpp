@@ -245,9 +245,13 @@ Benchmarks are logged in the console and show the performance of different gener
 ## Future Improvements
 
 - Add support for more pathfinding algorithms (e.g., A*).
-- Allow saving and loading mazes.
-- Fix timer to measure the player's time to solve the maze to restart after the maze is regenerated.
 - Refactor gui module.
+- Make maze functionalities modules as a static library.
+- Extend the project into several separate maze clients: gui, http, python lib, and more.
+  - http API (pistache.io) that will serve mazes on requests;
+  - Ability to save maze in a database;
+  - maze module as a portable python library;
+  - gui - facilitate changes to different gui providers.
 
 ---
 
