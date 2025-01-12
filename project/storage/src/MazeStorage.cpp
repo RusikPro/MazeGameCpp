@@ -11,24 +11,24 @@ namespace storage {
 void
 MazeStorage::save ( maze::IMaze const & _maze, std::string const & _filename )
 {
-    std::ofstream file( _filename, std::ios::binary );
+    std::ofstream file( _filename );
     if ( !file )
     {
         throw std::runtime_error( "Failed to open file for saving" );
     }
 
     int size = _maze.getSize();
-
-    file.write( reinterpret_cast< const char * >( &size ), sizeof( size ) );
-    const auto& grid = _maze.getGrid();
+    file << size << '\n';
+    auto const & grid = _maze.getGrid();
     for ( auto const & row : grid )
     {
         for ( auto const & room : row )
         {
-            file.write(
-                    reinterpret_cast< const char * >( room.walls )
-                ,   sizeof( room.walls )
-            );
+            for ( bool wall : room.walls )
+            {
+                file << wall << ' ';
+            }
+            file << '\n';
         }
     }
 }
@@ -38,23 +38,24 @@ MazeStorage::save ( maze::IMaze const & _maze, std::string const & _filename )
 void
 MazeStorage::load ( maze::IMaze & _maze, std::string const & _filename )
 {
-    std::ifstream file( _filename, std::ios::binary );
+    std::ifstream file( _filename );
     if ( !file )
     {
         throw std::runtime_error( "Failed to open file for loading" );
     }
 
     int size;
-    file.read( reinterpret_cast< char * >( &size ), sizeof( size ) );
+    file >> size;
     _maze.reset();
     auto & grid = _maze.takeGrid();
     for ( auto & row : grid )
     {
         for ( auto & room : row )
         {
-            file.read(
-                reinterpret_cast< char * >( room.walls ), sizeof( room.walls )
-            );
+            for ( bool & wall : room.walls )
+            {
+                file >> wall;
+            }
         }
     }
 }
