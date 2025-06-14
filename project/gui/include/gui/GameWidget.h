@@ -75,8 +75,8 @@ private:
     std::unique_ptr< QGraphicsScene > m_pScene;
     std::unique_ptr< QGraphicsView > m_pView;
 
-    QGraphicsEllipseItem * m_pPlayerItem;
-    QGraphicsRectItem * m_pDestinationItem;
+    QGraphicsEllipseItem * m_pPlayerItem = nullptr;
+    QGraphicsRectItem * m_pDestinationItem = nullptr;
 
     maze::IMaze * m_pMaze; // Current maze
     std::unique_ptr< maze::IMaze > m_pKruskalMaze;

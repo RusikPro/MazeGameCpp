@@ -32,6 +32,10 @@ GameWidget::GameWidget ( int _mazeSize, QWidget * parent )
     :   QWidget( parent )
     ,   m_pMaze( nullptr )
     ,   m_elapsedTime( 0 )
+    ,   m_pKruskalMaze( nullptr )
+    ,   m_pEllerMaze( nullptr )
+    ,   m_pPlayerItem( nullptr )
+    ,   m_pDestinationItem( nullptr )
 {
     auto mazeFactory = maze::IMazeFactory::createFactory();
     m_pKruskalMaze = mazeFactory->createMaze( maze::MazeAlgo::Kruskal, _mazeSize );
