@@ -20,24 +20,27 @@ PathFinder::PathFinder ( maze::IMaze const & _maze )
 
 /*----------------------------------------------------------------------------*/
 
-std::vector<  Point > PathFinder::neighbors ( Point const & _state )
+int PathFinder::getNeighbors (
+        Point const & _state
+    ,   Point outNeighbors[ MAX_NEIGHBORS ]
+) const
 {
-    std::vector< Point > result;
+    int count = 0;
     auto const & room = m_maze.getRoom( _state.x, _state.y );
 
     if ( !room.walls[ TOP_WALL ] && _state.y > 0 )
-        result.emplace_back( Point{ _state.x, _state.y - 1 } );
+        outNeighbors[ count++ ] = { _state.x, _state.y - 1 };
 
     if ( !room.walls[ RIGHT_WALL ] && _state.x < m_size - 1 )
-        result.emplace_back( Point{ _state.x + 1, _state.y } );
+        outNeighbors[ count++ ] = { _state.x + 1, _state.y };
 
     if ( !room.walls[ BOTTOM_WALL ] && _state.y < m_size - 1 )
-        result.emplace_back( Point{ _state.x, _state.y + 1 } );
+        outNeighbors[ count++ ] = { _state.x, _state.y + 1 };
 
     if (!room.walls[ LEFT_WALL ] && _state.x > 0)
-        result.emplace_back( Point{ _state.x - 1, _state.y } );
+        outNeighbors[ count++ ] = { _state.x - 1, _state.y };
 
-    return result;
+    return count;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -77,8 +80,13 @@ PathFinder::Path PathFinder::solve (
 
         explored.insert( node->state );
 
-        for ( auto const & neighbor : neighbors( node->state ) )
+        Point neighbors[ MAX_NEIGHBORS ];
+        int n = getNeighbors( node->state, neighbors );
+
+        // for ( auto const & neighbor : neighbors( node->state ) )
+        for ( int i = 0; i < n; ++i )
         {
+            auto const & neighbor = neighbors[ i ];
             if (    !frontier->contains( neighbor )
                 &&  explored.find( neighbor ) == explored.end()
             )
