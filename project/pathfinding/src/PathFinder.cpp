@@ -59,7 +59,9 @@ PathFinder::Path PathFinder::solve (
     auto startNode = std::make_shared< Node >( _start, nullptr );
     frontier->add(startNode);
 
-    std::unordered_set< Point > explored;
+    // Use a single visited set; mark when enqueuing to avoid duplicates in frontier
+    std::unordered_set< Point > visited;
+    visited.insert( _start );
 
     while ( !frontier->empty() )
     {
@@ -78,8 +80,6 @@ PathFinder::Path PathFinder::solve (
             return path;
         }
 
-        explored.insert( node->state );
-
         Point neighbors[ MAX_NEIGHBORS ];
         int n = getNeighbors( node->state, neighbors );
 
@@ -87,12 +87,11 @@ PathFinder::Path PathFinder::solve (
         for ( int i = 0; i < n; ++i )
         {
             auto const & neighbor = neighbors[ i ];
-            if (    !frontier->contains( neighbor )
-                &&  explored.find( neighbor ) == explored.end()
-            )
+            if ( visited.find( neighbor ) == visited.end() )
             {
                 auto child = std::make_shared< Node >( neighbor, node );
                 frontier->add(child);
+                visited.insert( neighbor );
             }
         }
     }
